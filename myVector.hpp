@@ -15,14 +15,14 @@ namespace sandsnip3r {
 	template<typename Type>
 	class MyVector {
 	public:
-		typedef Type value_type;
-		typedef std::allocator<value_type> allocator_type;
-		typedef size_t size_type;
-		typedef ptrdiff_t difference_type;
-		typedef Type& reference;
-		typedef const Type& const_reference;
-		typedef Type* pointer;
-		typedef const Type* const_pointer;
+		using value_type = Type;
+		using allocator_type = std::allocator<value_type>;
+		using size_type = size_t;
+		using difference_type = ptrdiff_t;
+		using reference = Type&;
+		using const_reference = const Type&;
+		using pointer = Type*;
+		using const_pointer = const Type*;
 		//iterator
 		//const_iterator
 		//reverse_iterator

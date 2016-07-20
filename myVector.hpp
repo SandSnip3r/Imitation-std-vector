@@ -240,13 +240,6 @@ namespace sandsnip3r {
 		//	>=
 
 		//std::swap
-
-		void Print() {
-			for (size_t i=0; i<vectorSize; ++i) {
-				std::cout << vectorData[i] << " ";
-			}
-			std::cout << std::endl;
-		}
 	};
 }
 

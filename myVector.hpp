@@ -209,10 +209,9 @@ namespace sandsnip3r {
 		}
 		
 		void pop_back() {
-			if (!this->empty()) {
-				vectorData[this->size()-1].~value_type();
-				--vectorSize;
-			}
+			throwIfEmpty("pop_back");
+			vectorData[this->size()-1].~value_type();
+			--vectorSize;
 		}
 
 		void resize(size_type count) {

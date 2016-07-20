@@ -33,6 +33,16 @@ namespace sandsnip3r {
 		size_t vectorSize{0};
 		size_t vectorCapacity{0};
 
+		void reallocateIfNecessary() {
+			//Arguments state the the golden ratio is the most appropriate growth factor
+			const auto GROWTH_FACTOR = 1.618;
+			if (this->size() == this->capacity()) {
+				//Need to reallocate to make space
+				size_type newCapacity = (vectorCapacity == 0 ? 1 : vectorCapacity * GROWTH_FACTOR);
+				reallocate(newCapacity);
+			}
+		}
+
 		void reallocate(size_type newCapacity) {
 			//Allocate memory for the new data
 			if (newCapacity > this->max_size()) {
@@ -159,32 +169,20 @@ namespace sandsnip3r {
 		//erase
 
 		void push_back(const value_type &obj) {
-			if (this->size() == this->capacity()) {
-				//Need to reallocate to make space
-				auto newCapacity = (vectorCapacity == 0 ? 1 : vectorCapacity * 2);
-				reserve(newCapacity);
-			}
+			reallocateIfNecessary();
 			new(vectorData.get()+vectorSize) value_type{obj};
 			++vectorSize;
 		}
 
 		void push_back(value_type &&obj) {
-			if (this->size() == this->capacity()) {
-				//Need to reallocate to make space
-				auto newCapacity = (vectorCapacity == 0 ? 1 : vectorCapacity * 2);
-				reserve(newCapacity);
-			}
+			reallocateIfNecessary();
 			new(vectorData.get()+vectorSize) value_type{std::move(obj)};
 			++vectorSize;
 		}
 
 		template<class... Args>
 		void emplace_back(Args&&... args) {
-			if (this->size() == this->capacity()) {
-				//Need to reallocate to make space
-				auto newCapacity = (vectorCapacity == 0 ? 1 : vectorCapacity * 2);
-				reserve(newCapacity);
-			}
+			reallocateIfNecessary();
 			new(vectorData.get()+vectorSize) value_type{std::forward<Args>(args)...};
 			++vectorSize;
 		}

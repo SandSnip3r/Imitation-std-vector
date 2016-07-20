@@ -35,6 +35,9 @@ namespace sandsnip3r {
 
 		void reallocate(size_type newCapacity) {
 			//Allocate memory for the new data
+			if (newCapacity > this->max_size()) {
+				throw std::length_error("MyVector::reallocate() newCapacity (which is "+std::to_string(newCapacity)+") > max_size (which is "+std::to_string(this->max_size())+")");
+			}
 			//	store it in a unique_ptr
 			std::unique_ptr<value_type[], std::function<void(value_type*)>> newData(vectorAllocator.allocate(newCapacity), [this, newCapacity](value_type *ptr){
 				vectorAllocator.deallocate(ptr, newCapacity);
@@ -124,9 +127,11 @@ namespace sandsnip3r {
 		}
 
 		//max_size
+		size_type max_size() const {
+			return std::numeric_limits<decltype(vectorSize)>::max();
+		}
 
 		void reserve(size_type newCapacity) {
-			//TODO: Check that we're under max_size
 			if (this->capacity() < newCapacity) {
 				reallocate(newCapacity);
 			}

@@ -150,8 +150,8 @@ namespace sandsnip3r {
 		void clear() {
 			for (size_type i=0; i<this->size(); ++i) {
 				vectorData[i].~value_type();
-				--vectorSize;
 			}
+			vectorSize = 0;
 		}
 
 		//insert

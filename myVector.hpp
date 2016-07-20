@@ -60,6 +60,26 @@ namespace sandsnip3r {
 			//Update the capacity
 			vectorCapacity = newCapacity;
 		}
+
+		reference elementAt(size_type pos) {
+			return vectorData[pos];
+		}
+
+		const_reference elementAt(size_type pos) const {
+			return vectorData[pos];
+		}
+
+		void throwIfOutOfBounds(size_type pos, const std::string &methodName) const {
+			if (!(pos < this->size())) {
+				throw std::out_of_range("MyVector::"+methodName+"() pos (which is "+std::to_string(pos)+") >= size (which is "+std::to_string(this->size())+")");
+			}
+		}
+
+		void throwIfEmpty(const std::string &methodName) const {
+			if (this->empty()) {
+				throw std::out_of_range("MyVector::"+methodName+"() is empty");
+			}
+		}
 	public:
 		//constructor
 
@@ -75,44 +95,41 @@ namespace sandsnip3r {
 		}
 
 		reference at(size_type pos) {
-			return const_cast<reference>(static_cast<const MyVector<value_type>*>(this)->at(pos));
+			throwIfOutOfBounds(pos, "at");
+			return elementAt(pos);
 		}
 
 		const_reference at(size_type pos) const {
-			if (!(pos < this->size())) {
-				throw std::out_of_range("MyVector::at() pos (which is "+std::to_string(pos)+") >= size (which is "+std::to_string(this->size())+")");
-			}
-			return vectorData[pos];
+			throwIfOutOfBounds(pos, "at");
+			return elementAt(pos);
 		}
 
 		reference operator[](size_type pos) {
-			return vectorData[pos];
+			return elementAt(pos);
 		}
 
 		const_reference operator[](size_type pos) const {
-			return vectorData[pos];
+			return elementAt(pos);
 		}
 
 		reference front() {
-			return const_cast<reference>(static_cast<const MyVector<value_type>*>(this)->front());
+			throwIfEmpty("front");
+			return elementAt(0);
 		}
 
 		const_reference front() const {
-			if (this->empty()) {
-				throw std::out_of_range("MyVector::front(), but it's empty");
-			}
-			return vectorData[0];
+			throwIfEmpty("front");
+			return elementAt(0);
 		}
 
 		reference back() {
-			return const_cast<reference>(static_cast<const MyVector<value_type>*>(this)->back());
+			throwIfEmpty("back");
+			return elementAt(this->size()-1);
 		}
 
 		const_reference back() const {
-			if (this->empty()) {
-				throw std::out_of_range("MyVector::back(), but it's empty");
-			}
-			return vectorData[this->size()-1];
+			throwIfEmpty("back");
+			return elementAt(this->size()-1);
 		}
 
 		pointer data() {

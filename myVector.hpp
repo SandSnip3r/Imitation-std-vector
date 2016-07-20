@@ -31,7 +31,7 @@ namespace sandsnip3r {
 		std::allocator<value_type> vectorAllocator;
 		std::unique_ptr<value_type[], std::function<void(value_type*)>> vectorData;
 		size_t vectorSize{0};
-		size_t vectorCapacity{0};
+		size_t vectorCapacity{0};		
 
 		void reallocateIfNecessary() {
 			//Arguments state the the golden ratio is the most appropriate growth factor
@@ -39,6 +39,12 @@ namespace sandsnip3r {
 			if (this->size() == this->capacity()) {
 				//Need to reallocate to make space
 				size_type newCapacity = (vectorCapacity == 0 ? 1 : vectorCapacity * GROWTH_FACTOR);
+				reallocate(newCapacity);
+			}
+		}
+
+		void reallocateIfNecessary(size_type newCapacity) {
+			if (this->capacity() < newCapacity) {
 				reallocate(newCapacity);
 			}
 		}
@@ -153,15 +159,13 @@ namespace sandsnip3r {
 			return vectorSize;
 		}
 
-		//max_size
 		size_type max_size() const {
+			//TODO: Implement this using allocator_traits
 			return std::numeric_limits<decltype(vectorSize)>::max();
 		}
 
 		void reserve(size_type newCapacity) {
-			if (this->capacity() < newCapacity) {
-				reallocate(newCapacity);
-			}
+			reallocateIfNecessary(newCapacity);
 		}
 
 		size_type capacity() const {
@@ -213,10 +217,7 @@ namespace sandsnip3r {
 
 		void resize(size_type count) {
 			if (this->size() < count) {
-				if (this->capacity() < count) {
-					//need to allocate more
-					reallocate(count);
-				}
+				reallocateIfNecessary(count);
 				while (vectorSize < count) {
 					//Fill with default constructed elements
 					new(vectorData.get()+vectorSize) value_type{};
@@ -232,10 +233,7 @@ namespace sandsnip3r {
 
 		void resize(size_type count, const value_type &value) {
 			if (this->size() < count) {
-				if (this->capacity() < count) {
-					//need to allocate more
-					reallocate(count);
-				}
+				reallocateIfNecessary(count);
 				while (vectorSize < count) {
 					//Fill with default constructed elements
 					new(vectorData.get()+vectorSize) value_type{value};

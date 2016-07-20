@@ -43,7 +43,7 @@ namespace sandsnip3r {
 			}
 		}
 
-		void reallocateIfNecessary(size_type newCapacity) {
+		void reallocateToNewSizeIfNecessary(size_type newCapacity) {
 			if (this->capacity() < newCapacity) {
 				reallocate(newCapacity);
 			}
@@ -165,7 +165,7 @@ namespace sandsnip3r {
 		}
 
 		void reserve(size_type newCapacity) {
-			reallocateIfNecessary(newCapacity);
+			reallocateToNewSizeIfNecessary(newCapacity);
 		}
 
 		size_type capacity() const {
@@ -217,7 +217,7 @@ namespace sandsnip3r {
 
 		void resize(size_type count) {
 			if (this->size() < count) {
-				reallocateIfNecessary(count);
+				reallocateToNewSizeIfNecessary(count);
 				while (vectorSize < count) {
 					//Fill with default constructed elements
 					new(vectorData.get()+vectorSize) value_type{};
@@ -233,7 +233,7 @@ namespace sandsnip3r {
 
 		void resize(size_type count, const value_type &value) {
 			if (this->size() < count) {
-				reallocateIfNecessary(count);
+				reallocateToNewSizeIfNecessary(count);
 				while (vectorSize < count) {
 					//Fill with default constructed elements
 					new(vectorData.get()+vectorSize) value_type{value};

@@ -159,7 +159,7 @@ namespace sandsnip3r {
 				auto newCapacity = (vectorCapacity == 0 ? 1 : vectorCapacity * 2);
 				reserve(newCapacity);
 			}
-			new(vectorData.get()+vectorSize) value_type(obj);
+			new(vectorData.get()+vectorSize) value_type{obj};
 			++vectorSize;
 		}
 
@@ -169,7 +169,7 @@ namespace sandsnip3r {
 				auto newCapacity = (vectorCapacity == 0 ? 1 : vectorCapacity * 2);
 				reserve(newCapacity);
 			}
-			new(vectorData.get()+vectorSize) value_type(std::move(obj));
+			new(vectorData.get()+vectorSize) value_type{std::move(obj)};
 			++vectorSize;
 		}
 
@@ -180,7 +180,7 @@ namespace sandsnip3r {
 				auto newCapacity = (vectorCapacity == 0 ? 1 : vectorCapacity * 2);
 				reserve(newCapacity);
 			}
-			new(vectorData.get()+vectorSize) value_type(std::forward<Args>(args)...);
+			new(vectorData.get()+vectorSize) value_type{std::forward<Args>(args)...};
 			++vectorSize;
 		}
 		
@@ -199,7 +199,7 @@ namespace sandsnip3r {
 				}
 				while (vectorSize < count) {
 					//Fill with default constructed elements
-					new(vectorData.get()+vectorSize) value_type();
+					new(vectorData.get()+vectorSize) value_type{};
 					++vectorSize;
 				}
 			} else if (this->size() > count) {
@@ -218,7 +218,7 @@ namespace sandsnip3r {
 				}
 				while (vectorSize < count) {
 					//Fill with default constructed elements
-					new(vectorData.get()+vectorSize) value_type(value);
+					new(vectorData.get()+vectorSize) value_type{value};
 					++vectorSize;
 				}
 			} else if (this->size() > count) {

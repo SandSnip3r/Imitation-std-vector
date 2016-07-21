@@ -50,11 +50,15 @@ ostream& operator<<(ostream &stream, const Mine &x) {
 int main() {
 	using VectorType = MyVector<Mine>;
 	// using VectorType = std::vector<Mine>;
+	cout << "Declaring vector" << endl;
 	VectorType v;
-	v.reserve(10);
-	cout << v.size() << " " << v.capacity() << endl;
+	int reserveAmount = 10;
+	cout << endl << "Reserving " << reserveAmount << endl;
+	v.reserve(reserveAmount);
+	cout << "Size=" << v.size() << ", capacity=" << v.capacity() << endl;
 	cout << endl << "pushing back #1" << endl;
-	v.push_back(Mine());
+	Mine temp;
+	v.push_back(temp);
 	cout << endl << "pushing back #2" << endl;
 	v.push_back(Mine());
 	cout << endl << "pushing back #3" << endl;
@@ -82,11 +86,14 @@ int main() {
 	int newResizeValue = 8;
 	cout << endl << "Going to resize from " << v.size() << " to " << newResizeValue << endl;
 	v.resize(newResizeValue);
+	newResizeValue = 9;
+	cout << endl << "Going to resize from " << v.size() << " to " << newResizeValue << endl;
+	v.resize(newResizeValue, Mine());
 	newResizeValue = 7;
 	cout << endl << "Going to resize from " << v.size() << " to " << newResizeValue << endl;
 	v.resize(newResizeValue);
-	cout << endl << "Clearing" << endl;
+	cout << endl << "Size now " << v.size() << ". Clearing" << endl;
 	v.clear();
-	cout << endl << "All done" << endl;
+	cout << endl << "All done. size=" << v.size() << ", capacity=" << v.capacity() << endl;
 	return 0;
 }

@@ -7,16 +7,16 @@
 #include <memory>
 
 namespace sandsnip3r {
-	template<typename Type>
+	template<class Type>
 	class MyVectorIterator {
 	private:
 	};
 
-	template<typename Type>
+	template<class Type, class Allocator = std::allocator<Type>>
 	class MyVector {
 	public:
 		using value_type = Type;
-		using allocator_type = std::allocator<value_type>;
+		using allocator_type = Allocator;
 		using size_type = size_t;
 		using difference_type = ptrdiff_t;
 		using reference = Type&;
@@ -28,7 +28,8 @@ namespace sandsnip3r {
 		//reverse_iterator
 		//const_reverse_iterator
 	private:
-		std::allocator<value_type> vectorAllocator;
+		allocator_type vectorAllocator;
+		using allocatorTraits = std::allocator_traits<allocator_type>;
 		std::unique_ptr<value_type[], std::function<void(value_type*)>> vectorData;
 		size_t vectorSize{0};
 		size_t vectorCapacity{0};		
@@ -55,8 +56,8 @@ namespace sandsnip3r {
 				throw std::length_error("MyVector::reallocate() newCapacity (which is "+std::to_string(newCapacity)+") > max_size (which is "+std::to_string(this->max_size())+")");
 			}
 			//	store it in a unique_ptr
-			std::unique_ptr<value_type[], std::function<void(value_type*)>> newData(vectorAllocator.allocate(newCapacity), [this, newCapacity](value_type *ptr){
-				vectorAllocator.deallocate(ptr, newCapacity);
+			std::unique_ptr<value_type[], std::function<void(value_type*)>> newData(allocatorTraits::allocate(vectorAllocator, newCapacity), [this, newCapacity](value_type *ptr){
+				allocatorTraits::deallocate(vectorAllocator, ptr, newCapacity);
 			});
 			//Move the old data into out new storage chunk
 			const auto &dataBegin = vectorData.get();
@@ -86,6 +87,14 @@ namespace sandsnip3r {
 				throw std::out_of_range("MyVector::"+methodName+"() is empty");
 			}
 		}
+
+		void resizeDown(size_type count) {
+			for (size_type i=count; i<this->size(); ++i) {
+				allocatorTraits::destroy(vectorAllocator, &vectorData[i]);
+			}
+			vectorSize = count;
+		}
+
 	public:
 		//constructor
 
@@ -160,8 +169,7 @@ namespace sandsnip3r {
 		}
 
 		size_type max_size() const {
-			//TODO: Implement this using allocator_traits
-			return std::numeric_limits<decltype(vectorSize)>::max();
+			return allocatorTraits::max_size(vectorAllocator);
 		}
 
 		void reserve(size_type newCapacity) {
@@ -179,10 +187,7 @@ namespace sandsnip3r {
 		}
 
 		void clear() {
-			for (size_type i=0; i<this->size(); ++i) {
-				vectorData[i].~value_type();
-			}
-			vectorSize = 0;
+			resizeDown(0);
 		}
 
 		//insert
@@ -191,27 +196,26 @@ namespace sandsnip3r {
 
 		void push_back(const value_type &obj) {
 			reallocateIfNecessary();
-			new(vectorData.get()+vectorSize) value_type{obj};
+			allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize], obj);
 			++vectorSize;
 		}
 
 		void push_back(value_type &&obj) {
 			reallocateIfNecessary();
-			new(vectorData.get()+vectorSize) value_type{std::move(obj)};
+			allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize], std::move(obj));
 			++vectorSize;
 		}
 
 		template<class... Args>
 		void emplace_back(Args&&... args) {
 			reallocateIfNecessary();
-			new(vectorData.get()+vectorSize) value_type{std::forward<Args>(args)...};
+			allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize], std::forward<Args>(args)...);
 			++vectorSize;
 		}
 		
 		void pop_back() {
 			throwIfEmpty("pop_back");
-			vectorData[this->size()-1].~value_type();
-			--vectorSize;
+			resizeDown(this->size()-1);
 		}
 
 		void resize(size_type count) {
@@ -219,14 +223,11 @@ namespace sandsnip3r {
 				reallocateToNewSizeIfNecessary(count);
 				while (vectorSize < count) {
 					//Fill with default constructed elements
-					new(vectorData.get()+vectorSize) value_type{};
+					allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize]);
 					++vectorSize;
 				}
 			} else if (this->size() > count) {
-				for (size_type i=this->size()-1; i>=count; --i) {
-					vectorData[i].~value_type();
-					--vectorSize;
-				}
+				resizeDown(count);
 			}
 		}
 
@@ -235,14 +236,11 @@ namespace sandsnip3r {
 				reallocateToNewSizeIfNecessary(count);
 				while (vectorSize < count) {
 					//Fill with default constructed elements
-					new(vectorData.get()+vectorSize) value_type{value};
+					allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize], value);
 					++vectorSize;
 				}
 			} else if (this->size() > count) {
-				for (size_type i=this->size()-1; i>=count; --i) {
-					vectorData[i].~value_type();
-					--vectorSize;
-				}
+				resizeDown(count);
 			}
 		}
 

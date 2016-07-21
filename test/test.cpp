@@ -92,7 +92,15 @@ int main() {
 	newResizeValue = 7;
 	cout << endl << "Going to resize from " << v.size() << " to " << newResizeValue << endl;
 	v.resize(newResizeValue);
-	cout << endl << "Size now " << v.size() << ". Clearing" << endl;
+	cout << endl << "Size now " << v.size() << endl;
+	VectorType v2;
+	cout << endl << "Assigning v to v2" << endl;
+	v2 = v;
+	cout << endl << "v2 assigned, size=" << v2.size() << ", capacity=" << v2.capacity()<< endl;
+	VectorType v3;
+	cout << endl << "Moving v2 to v3" << endl;
+	v3 = std::move(v2);
+	cout << endl << "v2 moved into v3, v3.size=" << v3.size() << ", v3.capacity=" << v3.capacity()<< ". Clearing v" << endl;
 	v.clear();
 	cout << endl << "All done. size=" << v.size() << ", capacity=" << v.capacity() << endl;
 	return 0;

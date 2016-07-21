@@ -28,11 +28,11 @@ namespace sandsnip3r {
 		//reverse_iterator
 		//const_reverse_iterator
 	private:
-		allocator_type vectorAllocator;
 		using allocatorTraits = std::allocator_traits<allocator_type>;
+		allocator_type vectorAllocator;
 		std::unique_ptr<value_type[], std::function<void(value_type*)>> vectorData;
 		size_t vectorSize{0};
-		size_t vectorCapacity{0};		
+		size_t vectorCapacity{0};
 
 		void reallocateIfNecessary() {
 			//Arguments state the the golden ratio is the most appropriate growth factor
@@ -99,10 +99,38 @@ namespace sandsnip3r {
 		//constructor
 
 		virtual ~MyVector() {
-			this->clear();
+			//destroy all elements
+			this->resizeDown(0);
+			//std::unique_ptr will handle deallocation
 		}
 
-		//operator=
+		MyVector& operator=(const MyVector &other) {
+			this->vectorAllocator = other.vectorAllocator;
+			//Destroy everything in this container
+			this->resizeDown(0);
+			//Allocate for higher capacity if neccessary
+			//	if 'other' has a smaller capacity, we dont reduce ours
+			this->reallocateToNewSizeIfNecessary(other.capacity());
+			//Copy construct all elements into this list
+			for (size_type i=0; i<other.size(); ++i) {
+				allocatorTraits::construct(vectorAllocator, &vectorData[i], other[i]);
+				++vectorSize;
+			}
+			return *this;
+		}
+
+		MyVector& operator=(MyVector &&other) {
+			this->vectorAllocator = std::move(other.vectorAllocator);
+			//Destroy everything in this container
+			this->resizeDown(0);
+			//Take ownership of everything from the other vector
+			this->vectorSize = std::move(other.vectorSize);
+			this->vectorCapacity = std::move(other.vectorCapacity);
+			this->vectorData = std::move(other.vectorData);
+			return *this;
+		}
+		//operator= initializer list
+
 		//assign
 
 		allocator_type get_allocator() const {
@@ -110,41 +138,41 @@ namespace sandsnip3r {
 		}
 
 		reference at(size_type pos) {
-			throwIfOutOfBounds(pos, "at");
-			return elementAt(pos);
+			this->throwIfOutOfBounds(pos, "at");
+			return this->elementAt(pos);
 		}
 
 		const_reference at(size_type pos) const {
-			throwIfOutOfBounds(pos, "at");
-			return elementAt(pos);
+			this->throwIfOutOfBounds(pos, "at");
+			return this->elementAt(pos);
 		}
 
 		reference operator[](size_type pos) {
-			return elementAt(pos);
+			return this->elementAt(pos);
 		}
 
 		const_reference operator[](size_type pos) const {
-			return elementAt(pos);
+			return this->elementAt(pos);
 		}
 
 		reference front() {
-			throwIfEmpty("front");
-			return elementAt(0);
+			this->throwIfEmpty("front");
+			return this->elementAt(0);
 		}
 
 		const_reference front() const {
-			throwIfEmpty("front");
-			return elementAt(0);
+			this->throwIfEmpty("front");
+			return this->elementAt(0);
 		}
 
 		reference back() {
-			throwIfEmpty("back");
-			return elementAt(this->size()-1);
+			this->throwIfEmpty("back");
+			return this->elementAt(this->size()-1);
 		}
 
 		const_reference back() const {
-			throwIfEmpty("back");
-			return elementAt(this->size()-1);
+			this->throwIfEmpty("back");
+			return this->elementAt(this->size()-1);
 		}
 
 		pointer data() {
@@ -173,7 +201,7 @@ namespace sandsnip3r {
 		}
 
 		void reserve(size_type newCapacity) {
-			reallocateToNewSizeIfNecessary(newCapacity);
+			this->reallocateToNewSizeIfNecessary(newCapacity);
 		}
 
 		size_type capacity() const {
@@ -182,12 +210,12 @@ namespace sandsnip3r {
 
 		void shrink_to_fit() {
 			if (this->size() < this->capacity()) {
-				reallocate(vectorSize);
+				this->reallocate(vectorSize);
 			}
 		}
 
 		void clear() {
-			resizeDown(0);
+			this->resizeDown(0);
 		}
 
 		//insert
@@ -195,52 +223,52 @@ namespace sandsnip3r {
 		//erase
 
 		void push_back(const value_type &obj) {
-			reallocateIfNecessary();
+			this->reallocateIfNecessary();
 			allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize], obj);
 			++vectorSize;
 		}
 
 		void push_back(value_type &&obj) {
-			reallocateIfNecessary();
+			this->reallocateIfNecessary();
 			allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize], std::move(obj));
 			++vectorSize;
 		}
 
 		template<class... Args>
 		void emplace_back(Args&&... args) {
-			reallocateIfNecessary();
+			this->reallocateIfNecessary();
 			allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize], std::forward<Args>(args)...);
 			++vectorSize;
 		}
 		
 		void pop_back() {
-			throwIfEmpty("pop_back");
-			resizeDown(this->size()-1);
+			this->throwIfEmpty("pop_back");
+			this->resizeDown(this->size()-1);
 		}
 
 		void resize(size_type count) {
 			if (this->size() < count) {
-				reallocateToNewSizeIfNecessary(count);
+				this->reallocateToNewSizeIfNecessary(count);
 				while (vectorSize < count) {
 					//Fill with default constructed elements
 					allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize]);
 					++vectorSize;
 				}
 			} else if (this->size() > count) {
-				resizeDown(count);
+				this->resizeDown(count);
 			}
 		}
 
 		void resize(size_type count, const value_type &value) {
 			if (this->size() < count) {
-				reallocateToNewSizeIfNecessary(count);
+				this->reallocateToNewSizeIfNecessary(count);
 				while (vectorSize < count) {
 					//Fill with default constructed elements
 					allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize], value);
 					++vectorSize;
 				}
 			} else if (this->size() > count) {
-				resizeDown(count);
+				this->resizeDown(count);
 			}
 		}
 

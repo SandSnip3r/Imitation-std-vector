@@ -48,11 +48,11 @@ ostream& operator<<(ostream &stream, const Mine &x) {
 }
 
 int main() {
-	using VectorType = MyVector<Mine>;
-	// using VectorType = std::vector<Mine>;
+	// using VectorType = MyVector<Mine>;
+	using VectorType = std::vector<Mine>;
 	cout << "Declaring vector" << endl;
 	VectorType v;
-	int reserveAmount = 10;
+	int reserveAmount = 11;
 	cout << endl << "Reserving " << reserveAmount << endl;
 	v.reserve(reserveAmount);
 	cout << "Size=" << v.size() << ", capacity=" << v.capacity() << endl;
@@ -84,24 +84,32 @@ int main() {
 	cout << "pop_back" << endl;
 	v.pop_back();
 	int newResizeValue = 8;
-	cout << endl << "Going to resize from " << v.size() << " to " << newResizeValue << endl;
+	cout << endl << "Going to resize from " << v.size() << " to " << newResizeValue << ", (capacity=" << v.capacity() << ")" << endl;
 	v.resize(newResizeValue);
-	newResizeValue = 9;
-	cout << endl << "Going to resize from " << v.size() << " to " << newResizeValue << endl;
+	newResizeValue = 10;
+	cout << endl << "Going to resize from " << v.size() << " to " << newResizeValue << ", (capacity=" << v.capacity() << ") with specified value" << endl;
 	v.resize(newResizeValue, Mine());
 	newResizeValue = 7;
-	cout << endl << "Going to resize from " << v.size() << " to " << newResizeValue << endl;
+	cout << endl << "Going to resize from " << v.size() << " to " << newResizeValue << ", (capacity=" << v.capacity() << ")" << endl;
 	v.resize(newResizeValue);
 	cout << endl << "Size now " << v.size() << endl;
-	VectorType v2;
-	cout << endl << "Assigning v to v2" << endl;
-	v2 = v;
-	cout << endl << "v2 assigned, size=" << v2.size() << ", capacity=" << v2.capacity()<< endl;
-	VectorType v3;
-	cout << endl << "Moving v2 to v3" << endl;
-	v3 = std::move(v2);
-	cout << endl << "v2 moved into v3, v3.size=" << v3.size() << ", v3.capacity=" << v3.capacity()<< ". Clearing v" << endl;
+	{
+		VectorType v2;
+		cout << endl << "Assigning v to v2" << endl;
+		v2 = v;
+		cout << endl << "v2 assigned, size=" << v2.size() << ", capacity=" << v2.capacity()<< endl;
+		{
+			VectorType v3;
+			cout << endl << "Moving v2 to v3" << endl;
+			v3 = std::move(v2);
+			cout << endl << "v2 moved into v3, v3.size=" << v3.size() << ", v3.capacity=" << v3.capacity()<< ". Destroying v3" << endl;
+		}
+		cout << endl << "v3 destroyed. Destorying v2" << endl;
+	}
+	cout << endl << "v2 destroyed. Clearing v" << endl;
 	v.clear();
-	cout << endl << "All done. size=" << v.size() << ", capacity=" << v.capacity() << endl;
+	cout << endl << "cleared. size=" << v.size() << ", capacity=" << v.capacity() << ". Now assigning using initializer_list" << endl;
+	v = {{},{}};
+	cout << endl << "Assigned. size=" << v.size() << ", capacity=" << v.capacity() << endl;
 	return 0;
 }

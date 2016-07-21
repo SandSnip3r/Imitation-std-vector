@@ -110,7 +110,7 @@ namespace sandsnip3r {
 			this->resizeDown(0);
 			//Allocate for higher capacity if neccessary
 			//	if 'other' has a smaller capacity, we dont reduce ours
-			this->reallocateToNewSizeIfNecessary(other.capacity());
+			this->reallocateToNewSizeIfNecessary(other.size());
 			//Copy construct all elements into this list
 			for (size_type i=0; i<other.size(); ++i) {
 				allocatorTraits::construct(vectorAllocator, &vectorData[i], other[i]);
@@ -125,8 +125,21 @@ namespace sandsnip3r {
 			this->resizeDown(0);
 			//Take ownership of everything from the other vector
 			this->vectorSize = std::move(other.vectorSize);
+			other.vectorSize = 0;
 			this->vectorCapacity = std::move(other.vectorCapacity);
 			this->vectorData = std::move(other.vectorData);
+			return *this;
+		}
+
+		MyVector& operator=(std::initializer_list<value_type> ilist) {
+			//Destroy everything in this container
+			this->resizeDown(0);
+			//Reallocate if this is larger than our current container
+			const size_type length = std::distance(ilist.begin(), ilist.end());
+			reallocateToNewSizeIfNecessary(length);
+			for (auto it=ilist.begin(), end=ilist.end(); it!=end; ++it) {
+				emplace_back(*it);
+			}
 			return *this;
 		}
 		//operator= initializer list

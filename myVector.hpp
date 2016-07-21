@@ -142,7 +142,6 @@ namespace sandsnip3r {
 			}
 			return *this;
 		}
-		//operator= initializer list
 
 		//assign
 

@@ -89,7 +89,7 @@ namespace sandsnip3r {
 	public:
 		//constructor
 
-		~MyVector() {
+		virtual ~MyVector() {
 			this->clear();
 		}
 

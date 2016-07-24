@@ -92,7 +92,7 @@ int main() {
 	newResizeValue = 7;
 	cout << endl << "Going to resize from " << v.size() << " to " << newResizeValue << ", (capacity=" << v.capacity() << ")" << endl;
 	v.resize(newResizeValue);
-	cout << endl << "Size now " << v.size() << endl;
+	cout << endl << "Size now " << v.size() << " and capacity=" << v.capacity() << endl;
 	{
 		VectorType v2;
 		cout << endl << "Assigning v to v2" << endl;
@@ -104,7 +104,27 @@ int main() {
 			v3 = std::move(v2);
 			cout << endl << "v2 moved into v3, v3.size=" << v3.size() << ", v3.capacity=" << v3.capacity()<< ". Destroying v3" << endl;
 		}
-		cout << endl << "v3 destroyed. Destorying v2" << endl;
+		cout << endl << "v3 destroyed. Destroying v2" << endl;
+	}
+	cout << endl << "v2 destroyed" << endl;
+	cout << "v size=" << v.size() << " and capacity=" << v.capacity() << endl;
+	{
+		cout << endl << "Copy constructing v to v2" << endl;
+		VectorType v2(v);
+		cout << endl << "v2 copy constructed, v2 size=" << v2.size() << " and capacity=" << v2.capacity()<< endl;
+		{
+			cout << endl << "Move constructing v2 to v3" << endl;
+			VectorType v3(std::move(v2));
+			cout << endl << "v3 move constructed, v3 size=" << v3.size() << " and capacity=" << v3.capacity()<< endl;
+			{
+				cout << endl << "Constructing with initializer_list" << endl;
+				VectorType v4{ Mine(), Mine(), Mine() };
+				cout << endl << "v4 constructed with init list, v4 size=" << v4.size() << " and capacity=" << v4.capacity()<< endl;
+				cout << endl << "Destroying v4" << endl;
+			}
+			cout << endl << "Destroying v3" << endl;
+		}
+		cout << endl << "v3 destroyed. Destroying v2" << endl;
 	}
 	cout << endl << "v2 destroyed. Clearing v" << endl;
 	v.clear();

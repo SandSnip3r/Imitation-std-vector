@@ -27,6 +27,7 @@ namespace sandsnip3r {
 		//const_iterator
 		//reverse_iterator
 		//const_reverse_iterator
+		
 	private:
 		using allocatorTraits = std::allocator_traits<allocator_type>;
 		allocator_type vectorAllocator;
@@ -96,7 +97,75 @@ namespace sandsnip3r {
 		}
 
 	public:
-		//constructor
+		MyVector() : MyVector(Allocator()) {}
+
+		explicit MyVector(const Allocator& alloc) : vectorAllocator(alloc) {}
+
+		MyVector(size_type count, const Type &value, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
+			reallocate(count);
+			while (vectorSize < count) {
+				//Fill with (count) 'value' elements
+				allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize], value);
+				++vectorSize;
+			}
+		}
+
+		MyVector(size_type count, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
+			reallocate(count);
+			while (vectorSize < count) {
+				//Fill with (count) default constructed elements
+				allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize]);
+				++vectorSize;
+			}
+		}
+
+		MyVector(const MyVector &other) {
+			this->vectorAllocator = allocatorTraits::select_on_container_copy_construction(other.get_allocator());
+			auto otherVectorSize = other.size();
+			//Allocate for higher capacity
+			reallocate(otherVectorSize);
+			//Copy construct all elements into this list
+			for (size_type i=0; i<otherVectorSize; ++i) {
+				allocatorTraits::construct(vectorAllocator, &vectorData[i], other[i]);
+				++vectorSize;
+			}
+		}
+
+		MyVector(const MyVector &other, const Allocator &alloc) : vectorAllocator(alloc) {
+			auto otherVectorSize = other.size();
+			//Allocate for higher capacity
+			reallocate(otherVectorSize);
+			//Copy construct all elements into this list
+			for (size_type i=0; i<otherVectorSize; ++i) {
+				allocatorTraits::construct(vectorAllocator, &vectorData[i], other[i]);
+				++vectorSize;
+			}
+		}
+
+		MyVector(MyVector &&other) {
+			//Take ownership of everything from the other vector
+			this->vectorAllocator = std::move(other.vectorAllocator);
+			this->vectorSize = std::move(other.vectorSize);
+			other.vectorSize = 0;
+			this->vectorCapacity = std::move(other.vectorCapacity);
+			this->vectorData = std::move(other.vectorData);
+		}
+
+		MyVector(MyVector &&other, const Allocator &alloc) : vectorAllocator(alloc) {
+			//Take ownership of everything from the other vector
+			this->vectorSize = std::move(other.vectorSize);
+			other.vectorSize = 0;
+			this->vectorCapacity = std::move(other.vectorCapacity);
+			this->vectorData = std::move(other.vectorData);
+		}
+
+		MyVector(std::initializer_list<Type> ilist, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
+			const size_type length = std::distance(ilist.begin(), ilist.end());
+			reallocate(length);
+			for (auto it=ilist.begin(), end=ilist.end(); it!=end; ++it) {
+				emplace_back(*it);
+			}
+		}
 
 		virtual ~MyVector() {
 			//destroy all elements

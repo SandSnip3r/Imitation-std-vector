@@ -48,8 +48,8 @@ ostream& operator<<(ostream &stream, const Mine &x) {
 }
 
 int main() {
-	using VectorType = MyVector<Mine>;
-	// using VectorType = std::vector<Mine>;
+	// using VectorType = MyVector<Mine>;
+	using VectorType = std::vector<Mine>;
 	cout << "Declaring vector" << endl;
 	VectorType v;
 	int reserveAmount = 11;

@@ -27,7 +27,7 @@ namespace sandsnip3r {
 		//const_iterator
 		//reverse_iterator
 		//const_reverse_iterator
-		
+
 	private:
 		using allocatorTraits = std::allocator_traits<allocator_type>;
 		allocator_type vectorAllocator;
@@ -174,29 +174,65 @@ namespace sandsnip3r {
 		}
 
 		MyVector& operator=(const MyVector &other) {
-			this->vectorAllocator = other.vectorAllocator;
-			//Destroy everything in this container
-			this->resizeDown(0);
-			//Allocate for higher capacity if neccessary
-			//	if 'other' has a smaller capacity, we dont reduce ours
-			this->reallocateToNewSizeIfNecessary(other.size());
-			//Copy construct all elements into this list
-			for (size_type i=0; i<other.size(); ++i) {
-				allocatorTraits::construct(vectorAllocator, &vectorData[i], other[i]);
-				++vectorSize;
+			if (&other != this) {
+				//Destroy everything in this container
+				this->resizeDown(0);
+
+				if (typename allocatorTraits::propagate_on_container_copy_assignment()) {
+					this->vectorAllocator = other.vectorAllocator;
+				} else if (this->vectorAllocator != other.vectorAllocator) {
+					//Allocators dont propigate and are different
+					//use current to deallocate
+					this->vectorData.reset(nullptr);
+					this->vectorCapacity = 0;
+					this->vectorAllocator = other.vectorAllocator;
+				} else {
+					//Allocators are the same, no need to copy
+				}
+
+				//Allocate for higher capacity if neccessary
+				//	if 'other' has a smaller capacity, we dont reduce ours
+				this->reallocateToNewSizeIfNecessary(other.size());
+				//Copy construct all elements into this list
+				for (size_type i=0; i<other.size(); ++i) {
+					allocatorTraits::construct(vectorAllocator, &vectorData[i], other[i]);
+					++vectorSize;
+				}
 			}
 			return *this;
 		}
 
 		MyVector& operator=(MyVector &&other) {
-			this->vectorAllocator = std::move(other.vectorAllocator);
-			//Destroy everything in this container
-			this->resizeDown(0);
-			//Take ownership of everything from the other vector
-			this->vectorSize = std::move(other.vectorSize);
-			other.vectorSize = 0;
-			this->vectorCapacity = std::move(other.vectorCapacity);
-			this->vectorData = std::move(other.vectorData);
+			if (&other != this) {
+				//Destroy everything in this container
+				this->resizeDown(0);
+
+				if (typename allocatorTraits::propagate_on_container_move_assignment()) {
+					//Allocator is propigated
+					this->vectorAllocator = other.vectorAllocator;
+					//Take ownership of everything from the other vector
+					this->vectorSize = std::move(other.vectorSize);
+					other.vectorSize = 0;
+					this->vectorCapacity = std::move(other.vectorCapacity);
+					this->vectorData = std::move(other.vectorData);
+				} else if (vectorAllocator != other.vectorAllocator) {
+					//Allocators are different
+					//keep current and move-construct all elements in-place
+					auto otherSize = other.size();
+					this->reallocateToNewSizeIfNecessary(otherSize);
+					for (size_type i=0; i<otherSize; ++i) {
+						allocatorTraits::construct(vectorAllocator, &vectorData[i], std::move(other.elementAt(i)));
+					}
+					vectorSize = otherSize;
+				} else {
+					//Allocators are equal
+					//Take ownership of everything from the other vector
+					this->vectorSize = std::move(other.vectorSize);
+					other.vectorSize = 0;
+					this->vectorCapacity = std::move(other.vectorCapacity);
+					this->vectorData = std::move(other.vectorData);
+				}
+			}
 			return *this;
 		}
 

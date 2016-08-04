@@ -4,10 +4,10 @@
 
 class TestObj;
 
-using IntVector = std::vector<int>;
-using CountingVector = std::vector<TestObj>;
-// using IntVector = sandsnip3r::MyVector<int>;
-// using CountingVector = sandsnip3r::MyVector<TestObj>;
+// using IntVector = std::vector<int>;
+// using CountingVector = std::vector<TestObj>;
+using IntVector = sandsnip3r::MyVector<int>;
+using CountingVector = sandsnip3r::MyVector<TestObj>;
 
 class TestObj {
 public:
@@ -454,6 +454,36 @@ TEST(Capacity, DISABLED_shrinkToFitWithCount) {
 	//Move assign once when we shrink into a smaller space
 	EXPECT_EQ(TestObj::moveAssignment, CREATE_COUNT*2);
 	EXPECT_EQ(TestObj::destruction, CREATE_COUNT);
+}
+
+TEST(Deletion, popBack) {
+	const size_t CREATE_COUNT = 10;
+
+	IntVector v(CREATE_COUNT);
+	v.pop_back();
+	
+	ASSERT_EQ(v.size(), CREATE_COUNT-1);
+	ASSERT_GE(v.capacity(), CREATE_COUNT);
+}
+
+TEST(Deletion, popBackWithCount) {
+	const size_t CREATE_COUNT = 10;
+
+	TestObj::resetCounts();
+	{
+		CountingVector v(CREATE_COUNT);
+		v.pop_back();
+		//pop_back should have only destroyed one object
+		ASSERT_EQ(TestObj::destruction, 1);
+	}
+	//Default constructs elements in place on vector construction
+	ASSERT_EQ(TestObj::defaultConstruction, CREATE_COUNT);
+	ASSERT_EQ(TestObj::valueConstruction, 0);
+	ASSERT_EQ(TestObj::copyConstruction, 0);
+	ASSERT_EQ(TestObj::moveConstruction, 0);
+	ASSERT_EQ(TestObj::copyAssignment, 0);
+	ASSERT_EQ(TestObj::moveAssignment, 0);
+	ASSERT_EQ(TestObj::destruction, CREATE_COUNT);
 }
 
 TEST(Deletion, clear) {

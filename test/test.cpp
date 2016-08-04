@@ -55,6 +55,10 @@ bool operator!=(const Mine &left, const Mine &right) {
 	return !(left == right);
 }
 
+bool operator<(const Mine &left, const Mine &right) {
+	return false;
+}
+
 int main() {
 	// using VectorType = MyVector<Mine>;
 	using VectorType = std::vector<Mine>;
@@ -141,7 +145,7 @@ int main() {
 	cout << endl << "Assigned. size=" << v.size() << ", capacity=" << v.capacity() << endl;
 
 	{
-		cout << endl << "Creating temp vector for comparison" << endl;
+		cout << endl << "Creating temp vector for equality comparison" << endl;
 		VectorType tempVector = v;
 		if (v == tempVector) {
 			cout << "[Equality compare 1] Equal" << endl;
@@ -152,6 +156,33 @@ int main() {
 			cout << "[Equality compare 2] Not equal" << endl;
 		} else {
 			cout << "[Equality compare 2] Equal" << endl;
+		}
+		cout << endl << "Destroying temp" << endl;
+	}
+	cout << endl << "temp destroyed" << endl;
+
+	{
+		cout << endl << "Creating temp vector for equality comparison" << endl;
+		VectorType tempVector = v;
+		if (v < tempVector) {
+			cout << "[less than] <" << endl;
+		} else {
+			cout << "[less than] >=" << endl;
+		}
+		if (v <= tempVector) {
+			cout << "[less than equal] <=" << endl;
+		} else {
+			cout << "[less than equal] >" << endl;
+		}
+		if (v > tempVector) {
+			cout << "[greater than] >" << endl;
+		} else {
+			cout << "[greater than] <=" << endl;
+		}
+		if (v >= tempVector) {
+			cout << "[greater than equal] >=" << endl;
+		} else {
+			cout << "[greater than equal] <" << endl;
 		}
 		cout << endl << "Destroying temp" << endl;
 	}

@@ -101,6 +101,15 @@ namespace sandsnip3r {
 
 		explicit MyVector(const Allocator& alloc) : vectorAllocator(alloc) {}
 
+		MyVector(size_type count, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
+			reallocate(count);
+			while (vectorSize < count) {
+				//Fill with (count) default constructed elements
+				allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize]);
+				++vectorSize;
+			}
+		}
+
 		MyVector(size_type count, const Type &value, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
 			reallocate(count);
 			while (vectorSize < count) {
@@ -110,12 +119,11 @@ namespace sandsnip3r {
 			}
 		}
 
-		MyVector(size_type count, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
-			reallocate(count);
-			while (vectorSize < count) {
-				//Fill with (count) default constructed elements
-				allocatorTraits::construct(vectorAllocator, &vectorData[vectorSize]);
-				++vectorSize;
+		MyVector(std::initializer_list<Type> ilist, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
+			const size_type length = std::distance(ilist.begin(), ilist.end());
+			reallocate(length);
+			for (auto it=ilist.begin(), end=ilist.end(); it!=end; ++it) {
+				emplace_back(*it);
 			}
 		}
 
@@ -157,14 +165,6 @@ namespace sandsnip3r {
 			other.vectorSize = 0;
 			this->vectorCapacity = std::move(other.vectorCapacity);
 			this->vectorData = std::move(other.vectorData);
-		}
-
-		MyVector(std::initializer_list<Type> ilist, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
-			const size_type length = std::distance(ilist.begin(), ilist.end());
-			reallocate(length);
-			for (auto it=ilist.begin(), end=ilist.end(); it!=end; ++it) {
-				emplace_back(*it);
-			}
 		}
 
 		virtual ~MyVector() {
@@ -412,6 +412,48 @@ namespace sandsnip3r {
 	template<class T, class Alloc>
 	bool operator!=(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
 		return !(left == right);
+	}
+
+	template<class T, class Alloc>
+	bool operator<(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+		if (left.size() != right.size()) {
+			return false;
+		}
+		auto leftSize = left.size();
+		auto rightSize = right.size();
+		auto smallerSize = std::min(leftSize, rightSize);
+		for (size_t i=0; i<smallerSize; ++i) {
+			if (left[i] < right[i]) {
+				//This element is less
+				return true;
+			} else if (left[i] != right[i]) {
+				//This element is greater
+				return false;
+			}
+		}
+		//All elements [0, smallerSize) are equal
+		if (leftSize < rightSize) {
+			//left is a prefix of right
+			return true;
+		} else {
+			//both are either completely equal or left is longer
+			return false;
+		}
+	}
+
+	template<class T, class Alloc>
+	bool operator<=(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+		return ((left == right) || (left < right));
+	}
+
+	template<class T, class Alloc>
+	bool operator>(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+		return (!(left == right) && !(left < right));
+	}
+
+	template<class T, class Alloc>
+	bool operator>=(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+		return !(left < right);
 	}
 	//operators:
 	//	<

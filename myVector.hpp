@@ -391,16 +391,33 @@ namespace sandsnip3r {
 
 		//swap
 
-		//operators:
-		//	==
-		//	!=
-		//	<
-		//	<=
-		//	>
-		//	>=
 
 		//std::swap
 	};
+
+	template<class T, class Alloc>
+	bool operator==(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+		if (left.size() != right.size()) {
+			return false;
+		}
+		size_t sizes = left.size();
+		for (size_t i=0; i<sizes; ++i) {
+			if (left[i] != right[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	template<class T, class Alloc>
+	bool operator!=(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+		return !(left == right);
+	}
+	//operators:
+	//	<
+	//	<=
+	//	>
+	//	>=
 }
 
 #endif //MYVECTOR_HPP

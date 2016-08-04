@@ -47,6 +47,14 @@ ostream& operator<<(ostream &stream, const Mine &x) {
 	return stream;
 }
 
+bool operator==(const Mine &left, const Mine &right) {
+	return true;
+}
+
+bool operator!=(const Mine &left, const Mine &right) {
+	return !(left == right);
+}
+
 int main() {
 	// using VectorType = MyVector<Mine>;
 	using VectorType = std::vector<Mine>;
@@ -131,5 +139,22 @@ int main() {
 	cout << endl << "cleared. size=" << v.size() << ", capacity=" << v.capacity() << ". Now assigning using initializer_list" << endl;
 	v = {{},{}};
 	cout << endl << "Assigned. size=" << v.size() << ", capacity=" << v.capacity() << endl;
+
+	{
+		cout << endl << "Creating temp vector for comparison" << endl;
+		VectorType tempVector = v;
+		if (v == tempVector) {
+			cout << "[Equality compare 1] Equal" << endl;
+		} else {
+			cout << "[Equality compare 1] Not equal" << endl;
+		}
+		if (v != tempVector) {
+			cout << "[Equality compare 2] Not equal" << endl;
+		} else {
+			cout << "[Equality compare 2] Equal" << endl;
+		}
+		cout << endl << "Destroying temp" << endl;
+	}
+	cout << endl << "temp destroyed" << endl;
 	return 0;
 }

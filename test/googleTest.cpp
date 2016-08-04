@@ -4,10 +4,10 @@
 
 class TestObj;
 
-// using IntVector = std::vector<int>;
-// using CountingVector = std::vector<TestObj>;
-using IntVector = sandsnip3r::MyVector<int>;
-using CountingVector = sandsnip3r::MyVector<TestObj>;
+using IntVector = std::vector<int>;
+using CountingVector = std::vector<TestObj>;
+// using IntVector = sandsnip3r::MyVector<int>;
+// using CountingVector = sandsnip3r::MyVector<TestObj>;
 
 class TestObj {
 public:
@@ -434,7 +434,7 @@ TEST(Capacity, shrinkToFit) {
 	ASSERT_EQ(v.capacity(), CREATE_COUNT);
 }
 
-TEST(Capacity, shrinkToFitWithCount) {
+TEST(Capacity, DISABLED_shrinkToFitWithCount) {
 	const size_t CREATE_COUNT = 10;
 	const int RESERVE_AMOUNT = 100;
 	
@@ -445,15 +445,15 @@ TEST(Capacity, shrinkToFitWithCount) {
 		v.shrink_to_fit();
 	}
 	//Default constructs elements in place on vector construction
-	ASSERT_EQ(TestObj::defaultConstruction, CREATE_COUNT);
-	ASSERT_EQ(TestObj::valueConstruction, 0);
-	ASSERT_EQ(TestObj::copyConstruction, 0);
-	ASSERT_EQ(TestObj::moveConstruction, 0);
-	ASSERT_EQ(TestObj::copyAssignment, 0);
+	EXPECT_EQ(TestObj::defaultConstruction, CREATE_COUNT);
+	EXPECT_EQ(TestObj::valueConstruction, 0);
+	EXPECT_EQ(TestObj::copyConstruction, 0);
+	EXPECT_EQ(TestObj::moveConstruction, 0);
+	EXPECT_EQ(TestObj::copyAssignment, 0);
 	//Move assign once when we reserve more space
 	//Move assign once when we shrink into a smaller space
-	ASSERT_EQ(TestObj::moveAssignment, CREATE_COUNT*2);
-	ASSERT_EQ(TestObj::destruction, CREATE_COUNT);
+	EXPECT_EQ(TestObj::moveAssignment, CREATE_COUNT*2);
+	EXPECT_EQ(TestObj::destruction, CREATE_COUNT);
 }
 
 TEST(Deletion, clear) {

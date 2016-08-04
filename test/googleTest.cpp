@@ -4,20 +4,20 @@
 
 class TestObj;
 
-// using IntVector = std::vector<int>;
-// using CountingVector = std::vector<TestObj>;
-using IntVector = sandsnip3r::MyVector<int>;
-using CountingVector = sandsnip3r::MyVector<TestObj>;
+using IntVector = std::vector<int>;
+using CountingVector = std::vector<TestObj>;
+// using IntVector = sandsnip3r::MyVector<int>;
+// using CountingVector = sandsnip3r::MyVector<TestObj>;
 
 class TestObj {
 public:
 	TestObj();
 	TestObj(int num);
-	TestObj(const TestObj &other);
-	TestObj(TestObj &&other);
+	TestObj(const TestObj &other) noexcept;
+	TestObj(TestObj &&other) noexcept;
 	~TestObj();
-	TestObj& operator=(const TestObj &other);
-	TestObj& operator=(TestObj &&other);
+	TestObj& operator=(const TestObj &other) noexcept;
+	TestObj& operator=(TestObj &&other) noexcept;
 	static int defaultConstruction;
 	static int valueConstruction;
 	static int copyConstruction;
@@ -44,11 +44,11 @@ TestObj::TestObj(int num) {
 	++valueConstruction;
 }
 
-TestObj::TestObj(const TestObj &other) {
+TestObj::TestObj(const TestObj &other) noexcept {
 	++copyConstruction;
 }
 
-TestObj::TestObj(TestObj &&other) {
+TestObj::TestObj(TestObj &&other) noexcept {
 	++moveConstruction;
 }
 
@@ -56,12 +56,12 @@ TestObj::~TestObj() {
 	++destruction;
 };
 
-TestObj& TestObj::operator=(const TestObj &other) {
+TestObj& TestObj::operator=(const TestObj &other) noexcept {
 	++copyAssignment;
 	return *this;
 }
 
-TestObj& TestObj::operator=(TestObj &&other) {
+TestObj& TestObj::operator=(TestObj &&other) noexcept {
 	++moveAssignment;
 	return *this;
 }
@@ -445,15 +445,15 @@ TEST(Capacity, DISABLED_shrinkToFitWithCount) {
 		v.shrink_to_fit();
 	}
 	//Default constructs elements in place on vector construction
-	EXPECT_EQ(TestObj::defaultConstruction, CREATE_COUNT);
-	EXPECT_EQ(TestObj::valueConstruction, 0);
-	EXPECT_EQ(TestObj::copyConstruction, 0);
-	EXPECT_EQ(TestObj::moveConstruction, 0);
-	EXPECT_EQ(TestObj::copyAssignment, 0);
+	ASSERT_EQ(TestObj::defaultConstruction, CREATE_COUNT);
+	ASSERT_EQ(TestObj::valueConstruction, 0);
+	ASSERT_EQ(TestObj::copyConstruction, 0);
+	ASSERT_EQ(TestObj::moveConstruction, 0);
+	ASSERT_EQ(TestObj::copyAssignment, 0);
 	//Move assign once when we reserve more space
 	//Move assign once when we shrink into a smaller space
-	EXPECT_EQ(TestObj::moveAssignment, CREATE_COUNT*2);
-	EXPECT_EQ(TestObj::destruction, CREATE_COUNT);
+	ASSERT_EQ(TestObj::moveAssignment, CREATE_COUNT*2);
+	ASSERT_EQ(TestObj::destruction, CREATE_COUNT);
 }
 
 TEST(Deletion, popBack) {

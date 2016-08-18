@@ -4,10 +4,10 @@
 
 class TestObj;
 
-using IntVector = std::vector<int>;
-using CountingVector = std::vector<TestObj>;
-// using IntVector = sandsnip3r::MyVector<int>;
-// using CountingVector = sandsnip3r::MyVector<TestObj>;
+// using IntVector = std::vector<int>;
+// using CountingVector = std::vector<TestObj>;
+using IntVector = sandsnip3r::MyVector<int>;
+using CountingVector = sandsnip3r::MyVector<TestObj>;
 
 class TestObj {
 public:
@@ -346,6 +346,7 @@ TEST(ElementAccess, atBeyondBounds) {
 TEST(ElementAccess, DISABLED_frontBeyondBounds) {
 	IntVector v;
 
+	//Standard states calling 'front' on an empty vector is undefined
 	bool exceptionThrown = false;
 	try {
 		v.front();
@@ -359,6 +360,7 @@ TEST(ElementAccess, DISABLED_frontBeyondBounds) {
 TEST(ElementAccess, DISABLED_backBeyondBounds) {
 	IntVector v;
 
+	//Standard states calling 'back' on an empty vector is undefined
 	bool exceptionThrown = false;
 	try {
 		v.back();

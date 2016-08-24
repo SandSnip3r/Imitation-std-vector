@@ -11,16 +11,25 @@ namespace sandsnip3r {
 	template<class Type, class Allocator = std::allocator<Type>>
 	class vector {
 	public:
-		using value_type = Type;
-		using allocator_type = Allocator;
-		using size_type = size_t;
-		using difference_type = ptrdiff_t;
-		using reference = Type&;
-		using const_reference = const Type&;
-		using pointer = Type*;
-		using const_pointer = const Type*;
+		using allocator_type 	= Allocator;
+		using value_type 			= typename Allocator::value_type;
+		using size_type 			= typename Allocator::size_type;
+		using difference_type = typename Allocator::difference_type;
+		using reference 			= typename Allocator::reference;
+		using const_reference = typename Allocator::const_reference;
+		using pointer 				= typename Allocator::pointer;
+		using const_pointer 	= typename Allocator::const_pointer;
 
 		class iterator {
+		public:
+			using value_type 				= typename Allocator::value_type;
+			using size_type 				= typename Allocator::size_type;
+			using difference_type 	= typename Allocator::difference_type;
+			using reference 				= typename Allocator::reference;
+			using const_reference 	= typename Allocator::const_reference;
+			using pointer 					= typename Allocator::pointer;
+			using const_pointer 		= typename Allocator::const_pointer;
+			using iterator_category = std::random_access_iterator_tag;
 		private:
 		};
 		//iterator

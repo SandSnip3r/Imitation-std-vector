@@ -1,13 +1,13 @@
 #include <iostream>
 #include "gtest/gtest.h"
-#include "myVector.hpp"
+#include "vector.hpp"
 
 class TestObj;
 
 // using IntVector = std::vector<int>;
 // using CountingVector = std::vector<TestObj>;
-using IntVector = sandsnip3r::MyVector<int>;
-using CountingVector = sandsnip3r::MyVector<TestObj>;
+using IntVector = sandsnip3r::vector<int>;
+using CountingVector = sandsnip3r::vector<TestObj>;
 
 class TestObj {
 public:

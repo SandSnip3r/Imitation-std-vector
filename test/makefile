@@ -9,7 +9,7 @@ all: googleTest
 googleTest: googleTest.o
 	$(CC) -o googleTest googleTest.o -lgtest -lgtest_main -pthread  $(CFLAGS)
 
-googleTest.o: googleTest.cpp ../myVector.hpp
+googleTest.o: googleTest.cpp ../vector.hpp
 	$(CC) -c googleTest.cpp -I../ $(CFLAGS)
 
 clean:

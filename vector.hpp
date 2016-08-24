@@ -1,5 +1,5 @@
-#ifndef MYVECTOR_HPP
-#define MYVECTOR_HPP 1
+#ifndef VECTOR_HPP
+#define VECTOR_HPP 1
 
 #include <algorithm>
 #include <cstddef>
@@ -7,13 +7,9 @@
 #include <memory>
 
 namespace sandsnip3r {
-	template<class Type>
-	class MyVectorIterator {
-	private:
-	};
 
 	template<class Type, class Allocator = std::allocator<Type>>
-	class MyVector {
+	class vector {
 	public:
 		using value_type = Type;
 		using allocator_type = Allocator;
@@ -23,6 +19,10 @@ namespace sandsnip3r {
 		using const_reference = const Type&;
 		using pointer = Type*;
 		using const_pointer = const Type*;
+
+		class iterator {
+		private:
+		};
 		//iterator
 		//const_iterator
 		//reverse_iterator
@@ -54,7 +54,7 @@ namespace sandsnip3r {
 		void reallocate(size_type newCapacity) {
 			//Allocate memory for the new data
 			if (newCapacity > this->max_size()) {
-				throw std::length_error("MyVector::reallocate() newCapacity (which is "+std::to_string(newCapacity)+") > max_size (which is "+std::to_string(this->max_size())+")");
+				throw std::length_error("vector::reallocate() newCapacity (which is "+std::to_string(newCapacity)+") > max_size (which is "+std::to_string(this->max_size())+")");
 			}
 			//	store it in a unique_ptr
 			std::unique_ptr<value_type[], std::function<void(value_type*)>> newData(allocatorTraits::allocate(vectorAllocator, newCapacity), [this, newCapacity](value_type *ptr){
@@ -79,13 +79,13 @@ namespace sandsnip3r {
 
 		void throwIfOutOfBounds(size_type pos, const std::string &methodName) const {
 			if (!(pos < this->size())) {
-				throw std::out_of_range("MyVector::"+methodName+"() pos (which is "+std::to_string(pos)+") >= size (which is "+std::to_string(this->size())+")");
+				throw std::out_of_range("vector::"+methodName+"() pos (which is "+std::to_string(pos)+") >= size (which is "+std::to_string(this->size())+")");
 			}
 		}
 
 		void throwIfEmpty(const std::string &methodName) const {
 			if (this->empty()) {
-				throw std::out_of_range("MyVector::"+methodName+"() is empty");
+				throw std::out_of_range("vector::"+methodName+"() is empty");
 			}
 		}
 
@@ -97,11 +97,11 @@ namespace sandsnip3r {
 		}
 
 	public:
-		MyVector() : MyVector(Allocator()) {}
+		vector() : vector(Allocator()) {}
 
-		explicit MyVector(const Allocator& alloc) : vectorAllocator(alloc) {}
+		explicit vector(const Allocator& alloc) : vectorAllocator(alloc) {}
 
-		MyVector(size_type count, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
+		vector(size_type count, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
 			reallocate(count);
 			while (vectorSize < count) {
 				//Fill with (count) default constructed elements
@@ -110,7 +110,7 @@ namespace sandsnip3r {
 			}
 		}
 
-		MyVector(size_type count, const Type &value, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
+		vector(size_type count, const Type &value, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
 			reallocate(count);
 			while (vectorSize < count) {
 				//Fill with (count) 'value' elements
@@ -119,7 +119,7 @@ namespace sandsnip3r {
 			}
 		}
 
-		MyVector(std::initializer_list<Type> ilist, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
+		vector(std::initializer_list<Type> ilist, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
 			const size_type length = std::distance(ilist.begin(), ilist.end());
 			reallocate(length);
 			for (auto it=ilist.begin(), end=ilist.end(); it!=end; ++it) {
@@ -127,7 +127,7 @@ namespace sandsnip3r {
 			}
 		}
 
-		MyVector(const MyVector &other) {
+		vector(const vector &other) {
 			this->vectorAllocator = allocatorTraits::select_on_container_copy_construction(other.get_allocator());
 			auto otherVectorSize = other.size();
 			//Allocate for higher capacity
@@ -139,7 +139,7 @@ namespace sandsnip3r {
 			}
 		}
 
-		MyVector(const MyVector &other, const Allocator &alloc) : vectorAllocator(alloc) {
+		vector(const vector &other, const Allocator &alloc) : vectorAllocator(alloc) {
 			auto otherVectorSize = other.size();
 			//Allocate for higher capacity
 			reallocate(otherVectorSize);
@@ -150,7 +150,7 @@ namespace sandsnip3r {
 			}
 		}
 
-		MyVector(MyVector &&other) {
+		vector(vector &&other) {
 			//Take ownership of everything from the other vector
 			this->vectorAllocator = std::move(other.vectorAllocator);
 			this->vectorSize = std::move(other.vectorSize);
@@ -159,7 +159,7 @@ namespace sandsnip3r {
 			this->vectorData = std::move(other.vectorData);
 		}
 
-		MyVector(MyVector &&other, const Allocator &alloc) : vectorAllocator(alloc) {
+		vector(vector &&other, const Allocator &alloc) : vectorAllocator(alloc) {
 			//Take ownership of everything from the other vector
 			this->vectorSize = std::move(other.vectorSize);
 			other.vectorSize = 0;
@@ -167,13 +167,13 @@ namespace sandsnip3r {
 			this->vectorData = std::move(other.vectorData);
 		}
 
-		virtual ~MyVector() {
+		virtual ~vector() {
 			//destroy all elements
 			this->resizeDown(0);
 			//std::unique_ptr will handle deallocation
 		}
 
-		MyVector& operator=(const MyVector &other) {
+		vector& operator=(const vector &other) {
 			if (&other != this) {
 				//Destroy everything in this container
 				this->resizeDown(0);
@@ -202,7 +202,7 @@ namespace sandsnip3r {
 			return *this;
 		}
 
-		MyVector& operator=(MyVector &&other) {
+		vector& operator=(vector &&other) {
 			if (&other != this) {
 				//Destroy everything in this container
 				this->resizeDown(0);
@@ -236,7 +236,7 @@ namespace sandsnip3r {
 			return *this;
 		}
 
-		MyVector& operator=(std::initializer_list<value_type> ilist) {
+		vector& operator=(std::initializer_list<value_type> ilist) {
 			//Destroy everything in this container
 			this->resizeDown(0);
 			//Reallocate if this is larger than our current container
@@ -396,7 +396,7 @@ namespace sandsnip3r {
 	};
 
 	template<class T, class Alloc>
-	bool operator==(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+	bool operator==(const vector<T, Alloc> &left, const vector<T, Alloc> &right) {
 		if (left.size() != right.size()) {
 			return false;
 		}
@@ -410,12 +410,12 @@ namespace sandsnip3r {
 	}
 
 	template<class T, class Alloc>
-	bool operator!=(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+	bool operator!=(const vector<T, Alloc> &left, const vector<T, Alloc> &right) {
 		return !(left == right);
 	}
 
 	template<class T, class Alloc>
-	bool operator<(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+	bool operator<(const vector<T, Alloc> &left, const vector<T, Alloc> &right) {
 		if (left.size() != right.size()) {
 			return false;
 		}
@@ -442,17 +442,17 @@ namespace sandsnip3r {
 	}
 
 	template<class T, class Alloc>
-	bool operator<=(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+	bool operator<=(const vector<T, Alloc> &left, const vector<T, Alloc> &right) {
 		return ((left == right) || (left < right));
 	}
 
 	template<class T, class Alloc>
-	bool operator>(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+	bool operator>(const vector<T, Alloc> &left, const vector<T, Alloc> &right) {
 		return (!(left == right) && !(left < right));
 	}
 
 	template<class T, class Alloc>
-	bool operator>=(const MyVector<T, Alloc> &left, const MyVector<T, Alloc> &right) {
+	bool operator>=(const vector<T, Alloc> &left, const vector<T, Alloc> &right) {
 		return !(left < right);
 	}
 	//operators:
@@ -462,4 +462,4 @@ namespace sandsnip3r {
 	//	>=
 }
 
-#endif //MYVECTOR_HPP
+#endif //VECTOR_HPP

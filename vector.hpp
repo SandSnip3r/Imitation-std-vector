@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <iostream>
+#include <iterator>
 #include <memory>
 
 namespace sandsnip3r {
@@ -21,6 +21,7 @@ namespace sandsnip3r {
 		using const_pointer 	= typename Allocator::const_pointer;
 
 		class iterator {
+		friend class vector;
 		public:
 			using value_type 				= typename Allocator::value_type;
 			using size_type 				= typename Allocator::size_type;
@@ -31,11 +32,96 @@ namespace sandsnip3r {
 			using const_pointer 		= typename Allocator::const_pointer;
 			using iterator_category = std::random_access_iterator_tag;
 		private:
+			pointer iteratorPointer{nullptr};
+			iterator(pointer ptr) : iteratorPointer(ptr) {} 
+		public:
+			iterator() {}
+			iterator(const iterator &it) : iteratorPointer(it.iteratorPointer) {}
+			// ~iterator();
+			iterator& operator=(const iterator &it) {
+				if (this != &it) {
+					this->iteratorPointer = it.iteratorPointer;
+				}
+				return *this;
+			}
+
+			bool operator==(const iterator &it) const {
+				return (this->iteratorPointer == it.iteratorPointer);
+			}
+
+			bool operator!=(const iterator &it) const {
+				return !(*this == it);
+			}
+
+			iterator& operator++() {
+				++iteratorPointer;
+				return *this;
+			}
+
+			reference operator*() const {
+				return *iteratorPointer;
+			}
+
+			pointer operator->() const {
+				return iteratorPointer;
+			}
 		};
-		//iterator
-		//const_iterator
-		//reverse_iterator
-		//const_reverse_iterator
+
+		class const_iterator {
+		friend class vector;
+		public:
+			using value_type 				= typename Allocator::value_type;
+			using size_type 				= typename Allocator::size_type;
+			using difference_type 	= typename Allocator::difference_type;
+			using reference 				= typename Allocator::reference;
+			using const_reference 	= typename Allocator::const_reference;
+			using pointer 					= typename Allocator::pointer;
+			using const_pointer 		= typename Allocator::const_pointer;
+			using iterator_category = std::random_access_iterator_tag;
+		private:
+			pointer iteratorPointer{nullptr};
+			const_iterator(pointer ptr) : iteratorPointer(ptr) {} 
+		public:
+			const_iterator() {}
+			const_iterator(const const_iterator &it) : iteratorPointer(it.iteratorPointer) {}
+			// ~const_iterator();
+			const_iterator& operator=(const const_iterator &it) {
+				if (this != &it) {
+					this->iteratorPointer = it.iteratorPointer;
+				}
+				return *this;
+			}
+
+			const_iterator& operator=(const iterator &it) {
+				if (this != &it) {
+					this->iteratorPointer = it.iteratorPointer;
+				}
+				return *this;
+			}
+
+			bool operator==(const const_iterator &it) const {
+				return (this->iteratorPointer == it.iteratorPointer);
+			}
+
+			bool operator!=(const const_iterator &it) const {
+				return !(*this == it);
+			}
+
+			const_iterator& operator++() {
+				++iteratorPointer;
+				return *this;
+			}
+
+			reference operator*() const {
+				return *iteratorPointer;
+			}
+
+			pointer operator->() const {
+				return iteratorPointer;
+			}
+		};
+		using reverse_iterator 				= std::reverse_iterator<iterator>;
+		using const_reverse_iterator 	= std::reverse_iterator<const_iterator>;
 
 	private:
 		using allocatorTraits = std::allocator_traits<allocator_type>;
@@ -309,7 +395,10 @@ namespace sandsnip3r {
 			return vectorData.get();
 		}
 
-		//begin, cbegin
+		iterator begin() const {
+			return vectorData.get();
+		}
+		//cbegin
 		//end, cend
 		//rbegin, crbegin
 		//rend, crend

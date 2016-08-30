@@ -2,12 +2,11 @@
 #include "gtest/gtest.h"
 #include "vector.hpp"
 
-class TestObj;
-
-// using IntVector = std::vector<int>;
-// using CountingVector = std::vector<TestObj>;
-using IntVector = sandsnip3r::vector<int>;
-using CountingVector = sandsnip3r::vector<TestObj>;
+//Easily switch between my vector and the STL vector
+//	to ensure the test results are equivalent
+template <class Type>
+// using Vector = std::vector<Type>;
+using Vector = sandsnip3r::vector<Type>;
 
 class TestObj {
 public:
@@ -28,6 +27,8 @@ public:
 	static void resetCounts();
 };
 
+//Declare TestObj's static members
+//	these are used for counting constructions and destructions
 int TestObj::defaultConstruction;
 int TestObj::valueConstruction;
 int TestObj::copyConstruction;
@@ -77,7 +78,7 @@ void TestObj::resetCounts() {
 }
 
 TEST(Construction, defaultConstruction) {
-	IntVector v;
+	Vector<int> v;
 	ASSERT_TRUE(v.empty());
 	ASSERT_EQ(v.size(), 0);
 	ASSERT_EQ(v.capacity(), 0);
@@ -86,7 +87,7 @@ TEST(Construction, defaultConstruction) {
 TEST(Construction, defaultConstructionWithCounts) {
 	TestObj::resetCounts();
 	{
-		CountingVector v;
+		Vector<TestObj> v;
 	}
 	ASSERT_EQ(TestObj::defaultConstruction, 0);
 	ASSERT_EQ(TestObj::valueConstruction, 0);
@@ -100,7 +101,7 @@ TEST(Construction, defaultConstructionWithCounts) {
 TEST(Construction, countWithoutValueConstruction) {
 	const size_t CREATE_COUNT = 10;
 
-	IntVector v(CREATE_COUNT);
+	Vector<int> v(CREATE_COUNT);
 
 	ASSERT_EQ(v.empty(), false);
 	ASSERT_EQ(v.size(), CREATE_COUNT);
@@ -112,7 +113,7 @@ TEST(Construction, countWithoutValueConstructionWithCounts) {
 
 	TestObj::resetCounts();
 	{
-		CountingVector v(CREATE_COUNT);
+		Vector<TestObj> v(CREATE_COUNT);
 	}
 	//Default constructs elements in place
 	ASSERT_EQ(TestObj::defaultConstruction, CREATE_COUNT);
@@ -128,7 +129,7 @@ TEST(Construction, countWithValueConstruction) {
 	const size_t CREATE_COUNT = 10;
 	const size_t DEFAULT_VALUE = 987654321;
 
-	IntVector v(CREATE_COUNT, DEFAULT_VALUE);
+	Vector<int> v(CREATE_COUNT, DEFAULT_VALUE);
 
 	ASSERT_EQ(v.empty(), false);
 	ASSERT_EQ(v.size(), CREATE_COUNT);
@@ -144,7 +145,7 @@ TEST(Construction, countWithValueConstructionWithCounts) {
 
 	TestObj::resetCounts();
 	{
-		CountingVector v(CREATE_COUNT, DEFAULT_VALUE);
+		Vector<TestObj> v(CREATE_COUNT, DEFAULT_VALUE);
 	}
 	ASSERT_EQ(TestObj::defaultConstruction, 0);
 	ASSERT_EQ(TestObj::valueConstruction, 0);
@@ -157,7 +158,7 @@ TEST(Construction, countWithValueConstructionWithCounts) {
 }
 
 TEST(Construction, initializerListConstruction) {
-	IntVector v{0, 1, 2, 3, 4};
+	Vector<int> v{0, 1, 2, 3, 4};
 
 	ASSERT_EQ(v.empty(), false);
 	ASSERT_EQ(v.size(), 5);
@@ -170,7 +171,7 @@ TEST(Construction, initializerListConstruction) {
 TEST(Construction, initializerListConstructionWithCounts) {
 	TestObj::resetCounts();
 	{
-		CountingVector v{0, 1, 2, 3, 4};
+		Vector<TestObj> v{0, 1, 2, 3, 4};
 	}
 	ASSERT_EQ(TestObj::defaultConstruction, 0);
 	//Constructs elements by value into the initializer list
@@ -188,8 +189,8 @@ TEST(Construction, copyConstruction) {
 	const size_t CREATE_COUNT = 10;
 	const size_t DEFAULT_VALUE = 987654321;
 
-	IntVector v(CREATE_COUNT, DEFAULT_VALUE);
-	IntVector newV(v);
+	Vector<int> v(CREATE_COUNT, DEFAULT_VALUE);
+	Vector<int> newV(v);
 
 	ASSERT_EQ(newV.empty(), false);
 	ASSERT_EQ(newV.size(), CREATE_COUNT);
@@ -203,11 +204,11 @@ TEST(Construction, copyConstructionWithCount) {
 	const size_t CREATE_COUNT = 10;
 	const auto DEFAULT_VALUE = TestObj();
 
-	CountingVector v(CREATE_COUNT, DEFAULT_VALUE);
+	Vector<TestObj> v(CREATE_COUNT, DEFAULT_VALUE);
 
 	TestObj::resetCounts();
 	{
-		CountingVector newV(v);
+		Vector<TestObj> newV(v);
 	}
 	ASSERT_EQ(TestObj::defaultConstruction, 0);
 	ASSERT_EQ(TestObj::valueConstruction, 0);
@@ -223,8 +224,8 @@ TEST(Construction, moveConstruction) {
 	const size_t CREATE_COUNT = 10;
 	const size_t DEFAULT_VALUE = 987654321;
 
-	IntVector v(CREATE_COUNT, DEFAULT_VALUE);
-	IntVector newV(std::move(v));
+	Vector<int> v(CREATE_COUNT, DEFAULT_VALUE);
+	Vector<int> newV(std::move(v));
 
 	ASSERT_EQ(newV.empty(), false);
 	ASSERT_EQ(newV.size(), CREATE_COUNT);
@@ -241,11 +242,11 @@ TEST(Construction, moveConstructionWithCount) {
 	const size_t CREATE_COUNT = 10;
 	const auto DEFAULT_VALUE = TestObj();
 
-	CountingVector v(CREATE_COUNT, DEFAULT_VALUE);
+	Vector<TestObj> v(CREATE_COUNT, DEFAULT_VALUE);
 
 	TestObj::resetCounts();
 	{
-		CountingVector newV(std::move(v));
+		Vector<TestObj> newV(std::move(v));
 	}
 	ASSERT_EQ(TestObj::defaultConstruction, 0);
 	ASSERT_EQ(TestObj::valueConstruction, 0);
@@ -260,8 +261,8 @@ TEST(Assignment, copyAssignment) {
 	const size_t CREATE_COUNT = 10;
 	const size_t DEFAULT_VALUE = 987654321;
 
-	IntVector v(CREATE_COUNT, DEFAULT_VALUE);
-	IntVector newV = v;
+	Vector<int> v(CREATE_COUNT, DEFAULT_VALUE);
+	Vector<int> newV = v;
 
 	ASSERT_EQ(newV.empty(), false);
 	ASSERT_EQ(newV.size(), CREATE_COUNT);
@@ -275,11 +276,11 @@ TEST(Assignment, copyAssignmentWithCount) {
 	const size_t CREATE_COUNT = 10;
 	const auto DEFAULT_VALUE = TestObj();
 
-	CountingVector v(CREATE_COUNT, DEFAULT_VALUE);
+	Vector<TestObj> v(CREATE_COUNT, DEFAULT_VALUE);
 
 	TestObj::resetCounts();
 	{
-		CountingVector newV;
+		Vector<TestObj> newV;
 		newV = v;
 	}
 	ASSERT_EQ(TestObj::defaultConstruction, 0);
@@ -296,10 +297,10 @@ TEST(Assignment, moveAssignment) {
 	const size_t CREATE_COUNT = 10;
 	const size_t DEFAULT_VALUE = 987654321;
 
-	IntVector v(CREATE_COUNT, DEFAULT_VALUE);
-	IntVector newV = std::move(v);
+	Vector<int> v(CREATE_COUNT, DEFAULT_VALUE);
+	Vector<int> newV = std::move(v);
 
-	ASSERT_EQ(newV.empty(), false);
+	ASSERT_FALSE(newV.empty());
 	ASSERT_EQ(newV.size(), CREATE_COUNT);
 	ASSERT_GE(newV.capacity(), CREATE_COUNT);
 	for (size_t i=0; i<CREATE_COUNT; ++i) {
@@ -314,13 +315,14 @@ TEST(Assignment, moveAssignmentWithCount) {
 	const size_t CREATE_COUNT = 10;
 	const auto DEFAULT_VALUE = TestObj();
 
-	CountingVector v(CREATE_COUNT, DEFAULT_VALUE);
+	Vector<TestObj> v(CREATE_COUNT, DEFAULT_VALUE);
 
 	TestObj::resetCounts();
 	{
-		CountingVector newV;
+		Vector<TestObj> newV;
 		newV = std::move(v);
 	}
+	//Nothing should've been created while moving the vector
 	ASSERT_EQ(TestObj::defaultConstruction, 0);
 	ASSERT_EQ(TestObj::valueConstruction, 0);
 	ASSERT_EQ(TestObj::copyConstruction, 0);
@@ -331,7 +333,7 @@ TEST(Assignment, moveAssignmentWithCount) {
 }
 
 TEST(ElementAccess, atBeyondBounds) {
-	IntVector v;
+	Vector<int> v;
 
 	bool exceptionThrown = false;
 	try {
@@ -343,8 +345,8 @@ TEST(ElementAccess, atBeyondBounds) {
 	ASSERT_TRUE(exceptionThrown);
 }
 
-TEST(ElementAccess, DISABLED_frontBeyondBounds) {
-	IntVector v;
+TEST(ElementAccess, frontBeyondBounds) {
+	Vector<int> v;
 
 	//Standard states calling 'front' on an empty vector is undefined
 	bool exceptionThrown = false;
@@ -354,11 +356,12 @@ TEST(ElementAccess, DISABLED_frontBeyondBounds) {
 		exceptionThrown = true;
 	}
 	
-	ASSERT_TRUE(exceptionThrown);
+	//Expect that no exception was thrown
+	ASSERT_FALSE(exceptionThrown);
 }
 
-TEST(ElementAccess, DISABLED_backBeyondBounds) {
-	IntVector v;
+TEST(ElementAccess, backBeyondBounds) {
+	Vector<int> v;
 
 	//Standard states calling 'back' on an empty vector is undefined
 	bool exceptionThrown = false;
@@ -368,13 +371,14 @@ TEST(ElementAccess, DISABLED_backBeyondBounds) {
 		exceptionThrown = true;
 	}
 	
-	ASSERT_TRUE(exceptionThrown);
+	//Expect that no exception was thrown
+	ASSERT_FALSE(exceptionThrown);
 }
 
 TEST(Capacity, reserveUp) {
 	const int RESERVE_AMOUNT = 100;
 
-	IntVector v;
+	Vector<int> v;
 	v.reserve(RESERVE_AMOUNT);
 	
 	ASSERT_GE(v.capacity(), RESERVE_AMOUNT);
@@ -385,9 +389,10 @@ TEST(Capacity, reserveUpWithCount) {
 
 	TestObj::resetCounts();
 	{
-		CountingVector v;
+		Vector<TestObj> v;
 		v.reserve(RESERVE_AMOUNT);
 	}
+	//Nothing should've been created or destroyed
 	ASSERT_EQ(TestObj::defaultConstruction, 0);
 	ASSERT_EQ(TestObj::valueConstruction, 0);
 	ASSERT_EQ(TestObj::copyConstruction, 0);
@@ -400,10 +405,11 @@ TEST(Capacity, reserveUpWithCount) {
 TEST(Capacity, reserveDown) {
 	const int RESERVE_AMOUNT = 100;
 
-	IntVector v;
+	Vector<int> v;
 	v.reserve(RESERVE_AMOUNT);
 	v.reserve(0);
 	
+	//The size of the container is not expected to be reduced
 	ASSERT_GE(v.capacity(), RESERVE_AMOUNT);
 }
 
@@ -412,10 +418,11 @@ TEST(Capacity, reserveDownWithCount) {
 	
 	TestObj::resetCounts();
 	{
-		CountingVector v;
+		Vector<TestObj> v;
 		v.reserve(RESERVE_AMOUNT);
 		v.reserve(0);
 	}
+	//Nothing should've been created or destroyed
 	ASSERT_EQ(TestObj::defaultConstruction, 0);
 	ASSERT_EQ(TestObj::valueConstruction, 0);
 	ASSERT_EQ(TestObj::copyConstruction, 0);
@@ -429,7 +436,7 @@ TEST(Capacity, shrinkToFit) {
 	const size_t CREATE_COUNT = 10;
 	const int RESERVE_AMOUNT = 100;
 
-	IntVector v(CREATE_COUNT);
+	Vector<int> v(CREATE_COUNT);
 	v.reserve(RESERVE_AMOUNT);
 	v.shrink_to_fit();
 	
@@ -442,7 +449,7 @@ TEST(Capacity, DISABLED_shrinkToFitWithCount) {
 	
 	TestObj::resetCounts();
 	{
-		CountingVector v(CREATE_COUNT);
+		Vector<TestObj> v(CREATE_COUNT);
 		v.reserve(RESERVE_AMOUNT);
 		v.shrink_to_fit();
 	}
@@ -461,7 +468,7 @@ TEST(Capacity, DISABLED_shrinkToFitWithCount) {
 TEST(Deletion, popBack) {
 	const size_t CREATE_COUNT = 10;
 
-	IntVector v(CREATE_COUNT);
+	Vector<int> v(CREATE_COUNT);
 	v.pop_back();
 	
 	ASSERT_EQ(v.size(), CREATE_COUNT-1);
@@ -473,7 +480,7 @@ TEST(Deletion, popBackWithCount) {
 
 	TestObj::resetCounts();
 	{
-		CountingVector v(CREATE_COUNT);
+		Vector<TestObj> v(CREATE_COUNT);
 		v.pop_back();
 		//pop_back should have only destroyed one object
 		ASSERT_EQ(TestObj::destruction, 1);
@@ -491,7 +498,7 @@ TEST(Deletion, popBackWithCount) {
 TEST(Deletion, clear) {
 	const size_t CREATE_COUNT = 10;
 
-	IntVector v(CREATE_COUNT);
+	Vector<int> v(CREATE_COUNT);
 	v.clear();
 	
 	ASSERT_EQ(v.capacity(), CREATE_COUNT);
@@ -504,7 +511,7 @@ TEST(Deletion, clearWithCount) {
 	
 	TestObj::resetCounts();
 	{
-		CountingVector v(CREATE_COUNT);
+		Vector<TestObj> v(CREATE_COUNT);
 		v.clear();
 		//Default constructs elements in place on vector construction
 		ASSERT_EQ(TestObj::defaultConstruction, CREATE_COUNT);
@@ -517,4 +524,139 @@ TEST(Deletion, clearWithCount) {
 	}
 	//Destruction of the vector shouldnt have changed anything
 	ASSERT_EQ(TestObj::destruction, CREATE_COUNT);
+}
+
+TEST(Swap, memberSwapBothNonEmpty) {
+	const size_t CREATE_COUNT_1 = 10;
+	const size_t CREATE_COUNT_2 = 500;
+
+	ASSERT_NE(CREATE_COUNT_1, CREATE_COUNT_2);
+
+	Vector<int> v1(CREATE_COUNT_1);
+	Vector<int> v2(CREATE_COUNT_2);
+	
+	v1.swap(v2);
+
+	ASSERT_EQ(v2.size(), CREATE_COUNT_1);
+	ASSERT_EQ(v2.capacity(), CREATE_COUNT_1);
+	ASSERT_EQ(v1.size(), CREATE_COUNT_2);
+	ASSERT_EQ(v1.capacity(), CREATE_COUNT_2);
+}
+
+TEST(Swap, memberSwapBothNonEmptyWithCount) {
+	const size_t CREATE_COUNT_1 = 10;
+	const size_t CREATE_COUNT_2 = 500;
+
+	ASSERT_NE(CREATE_COUNT_1, CREATE_COUNT_2);
+
+	Vector<int> v1(CREATE_COUNT_1);
+	Vector<int> v2(CREATE_COUNT_2);
+	
+	TestObj::resetCounts();
+	v1.swap(v2);
+
+	//Nothing should've been created or destroyed
+	ASSERT_EQ(TestObj::defaultConstruction, 0);
+	ASSERT_EQ(TestObj::valueConstruction, 0);
+	ASSERT_EQ(TestObj::copyConstruction, 0);
+	ASSERT_EQ(TestObj::moveConstruction, 0);
+	ASSERT_EQ(TestObj::copyAssignment, 0);
+	ASSERT_EQ(TestObj::moveAssignment, 0);
+	ASSERT_EQ(TestObj::destruction, 0);
+}
+
+TEST(Swap, memberSwapOneEmpty) {
+	const size_t CREATE_COUNT = 10;
+
+	Vector<int> v1(CREATE_COUNT);
+	Vector<int> v2;
+	
+	v1.swap(v2);
+
+	ASSERT_EQ(v2.size(), CREATE_COUNT);
+	ASSERT_EQ(v2.capacity(), CREATE_COUNT);
+	ASSERT_TRUE(v1.empty());
+	ASSERT_EQ(v1.size(), 0);
+	ASSERT_EQ(v1.capacity(), 0);
+}
+
+TEST(Swap, memberSwapOneEmptyWithCount) {
+	const size_t CREATE_COUNT = 10;
+
+	Vector<int> v1(CREATE_COUNT);
+	Vector<int> v2;
+	
+	TestObj::resetCounts();
+	v1.swap(v2);
+
+	//Nothing should've been created or destroyed
+	ASSERT_EQ(TestObj::defaultConstruction, 0);
+	ASSERT_EQ(TestObj::valueConstruction, 0);
+	ASSERT_EQ(TestObj::copyConstruction, 0);
+	ASSERT_EQ(TestObj::moveConstruction, 0);
+	ASSERT_EQ(TestObj::copyAssignment, 0);
+	ASSERT_EQ(TestObj::moveAssignment, 0);
+	ASSERT_EQ(TestObj::destruction, 0);
+}
+
+TEST(Swap, memberSwapBothEmpty) {
+	Vector<int> v1, v2;
+	
+	v1.swap(v2);
+
+	ASSERT_TRUE(v2.empty());
+	ASSERT_EQ(v2.size(), 0);
+	ASSERT_EQ(v2.capacity(), 0);
+	ASSERT_TRUE(v1.empty());
+	ASSERT_EQ(v1.size(), 0);
+	ASSERT_EQ(v1.capacity(), 0);
+}
+
+TEST(Swap, memberSwapBothEmptyWithCount) {
+	Vector<int> v1, v2;
+	
+	TestObj::resetCounts();
+	v1.swap(v2);
+
+	//Nothing should've been created or destroyed
+	ASSERT_EQ(TestObj::defaultConstruction, 0);
+	ASSERT_EQ(TestObj::valueConstruction, 0);
+	ASSERT_EQ(TestObj::copyConstruction, 0);
+	ASSERT_EQ(TestObj::moveConstruction, 0);
+	ASSERT_EQ(TestObj::copyAssignment, 0);
+	ASSERT_EQ(TestObj::moveAssignment, 0);
+	ASSERT_EQ(TestObj::destruction, 0);
+}
+
+TEST(Comparison, equalityBothEmpty) {
+	Vector<int> v1, v2;
+	
+	ASSERT_TRUE(v1==v2);
+}
+
+TEST(Comparison, equalityOneEmpty) {
+	const size_t CREATE_COUNT = 10;
+	Vector<int> v1;
+	Vector<int> v2(CREATE_COUNT);
+	
+	ASSERT_FALSE(v1==v2);
+}
+
+TEST(Comparison, equalityDifferentSizes) {
+	const size_t CREATE_COUNT_1 = 5;
+	const size_t CREATE_COUNT_2 = 10;
+	Vector<int> v1(CREATE_COUNT_1);
+	Vector<int> v2(CREATE_COUNT_2);
+	
+	ASSERT_FALSE(v1==v2);
+}
+
+TEST(Comparison, equalitySameSizeDifferentCapacity) {
+	const size_t CREATE_COUNT = 10;
+	const size_t RESERVE_COUNT = 100;
+	Vector<int> v1(CREATE_COUNT);
+	Vector<int> v2(CREATE_COUNT);
+	v2.reserve(RESERVE_COUNT);
+	
+	ASSERT_TRUE(v1==v2);
 }

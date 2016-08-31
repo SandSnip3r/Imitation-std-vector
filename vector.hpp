@@ -335,6 +335,16 @@ namespace sandsnip3r {
 			}
 		}
 
+		/*template<class InputIt>
+		vector(InputIt first, InputIt last, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
+			reallocate(last-first);
+			while (first != last) {
+				//Fill with elements in range
+				emplace_back(*first);
+				++first;
+			}
+		}*/
+
 		vector(std::initializer_list<Type> ilist, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
 			const size_type length = std::distance(ilist.begin(), ilist.end());
 			reallocate(length);
@@ -343,9 +353,7 @@ namespace sandsnip3r {
 			}
 		}
 
-		vector(const vector &other) {
-			//TODO ^
-			vectorAllocator = allocatorTraits::select_on_container_copy_construction(other.get_allocator());
+		vector(const vector &other) : vectorAllocator(allocatorTraits::select_on_container_copy_construction(other.get_allocator())) {
 			auto otherVectorSize = other.size();
 			//Allocate for higher capacity
 			reallocate(otherVectorSize);
@@ -547,6 +555,30 @@ namespace sandsnip3r {
 			return dataEnd;
 		}
 
+		reverse_iterator rbegin() {
+			return reverse_iterator(end());
+		}
+
+		const_reverse_iterator rbegin() const {
+			return const_reverse_iterator(end());
+		}
+
+		const_reverse_iterator crbegin() const {
+			return const_reverse_iterator(end());
+		}
+
+		reverse_iterator rend() {
+			return reverse_iterator(begin());
+		}
+
+		const_reverse_iterator rend() const {
+			return const_reverse_iterator(begin());
+		}
+
+		const_reverse_iterator crend() const {
+			return const_reverse_iterator(begin());
+		}
+
 		//rbegin, crbegin
 		//rend, crend
 
@@ -688,6 +720,7 @@ namespace sandsnip3r {
 			++leftIt;
 			++rightIt;
 		}
+		//Return if left is a subset of right
 		return (leftIt == leftEnd) && (rightIt != rightEnd);
 	}
 
@@ -703,6 +736,8 @@ namespace sandsnip3r {
 			++leftIt;
 			++rightIt;
 		}
+		//If leftIt!=leftEnd, that means that it still has remaining elements but right doesnt
+		//	this means right is a subset of left
 		return leftIt == leftEnd;
 	}
 	

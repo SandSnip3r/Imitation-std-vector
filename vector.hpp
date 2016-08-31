@@ -650,7 +650,6 @@ namespace sandsnip3r {
 			std::swap(containerEnd, other.containerEnd);
 		}
 
-
 		//std::swap
 	};
 
@@ -677,42 +676,62 @@ namespace sandsnip3r {
 		return !(left == right);
 	}
 
-	template<class T, class Alloc, class Compare>
-	bool myComparison(const vector<T, Alloc> &left, const vector<T, Alloc> &right, Compare comp) {
-		auto leftIt = left.begin();
-		auto leftEnd = left.end();
-		auto rightIt = right.begin();
-		auto rightEnd = right.end();
-		for (; (leftIt != leftEnd) && (rightIt != rightEnd); leftIt++, rightIt++ ) {
-			if (comp(*leftIt, *rightIt)) {
+	template<class Iterator1, class Iterator2>
+	bool myComparisonWithoutEqual(Iterator1 leftIt, Iterator1 leftEnd, Iterator2 rightIt, Iterator2 rightEnd) {
+		while ((leftIt != leftEnd) && (rightIt != rightEnd)) {
+			if (*leftIt < *rightIt) {
+				//Encountered an element where the comparison is true
 				return true;
 			}
-			if (comp(*rightIt, *leftIt)) {
+			if (*rightIt < *leftIt) {
+				//Encountered an element where the reverse comparison is true
 				return false;
 			}
+			//Elements were equal
+			++leftIt;
+			++rightIt;
 		}
+		//One list is a subset of another or both are the same length
 		return (leftIt == leftEnd) && (rightIt != rightEnd);
+	}
 
+	template<class Iterator1, class Iterator2>
+	bool myComparisonWithEqual(Iterator1 leftIt, Iterator1 leftEnd, Iterator2 rightIt, Iterator2 rightEnd) {
+		while ((leftIt != leftEnd) && (rightIt != rightEnd)) {
+			if (*leftIt < *rightIt) {
+				//Encountered an element where the comparison is true
+				return true;
+			}
+			if (*rightIt < *leftIt) {
+				//Encountered an element where the reverse comparison is true
+				return false;
+			}
+			//Elements were equal
+			++leftIt;
+			++rightIt;
+		}
+		//One list is a subset of another or both are the same length
+		return leftIt == leftEnd;
 	}
 	
 	template<class T, class Alloc>
 	bool operator<(const vector<T, Alloc> &left, const vector<T, Alloc> &right) {
-		return myComparison(left, right, std::less<T>());
+		return myComparisonWithoutEqual(left.begin(), left.end(), right.begin(), right.end());
 	}
 
 	template<class T, class Alloc>
 	bool operator<=(const vector<T, Alloc> &left, const vector<T, Alloc> &right) {
-		return myComparison(left, right, std::less_equal<T>());
+		return myComparisonWithEqual(left.begin(), left.end(), right.begin(), right.end());
 	}
 
 	template<class T, class Alloc>
 	bool operator>(const vector<T, Alloc> &left, const vector<T, Alloc> &right) {
-		return myComparison(left, right, std::greater<T>());
+		return myComparisonWithoutEqual(right.begin(), right.end(), left.begin(), left.end());
 	}
 
 	template<class T, class Alloc>
 	bool operator>=(const vector<T, Alloc> &left, const vector<T, Alloc> &right) {
-		return myComparison(left, right, std::greater_equal<T>());
+		return myComparisonWithEqual(right.begin(), right.end(), left.begin(), left.end());
 	}
 }
 

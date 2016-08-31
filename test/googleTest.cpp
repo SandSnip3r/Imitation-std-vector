@@ -628,35 +628,73 @@ TEST(Swap, memberSwapBothEmptyWithCount) {
 	ASSERT_EQ(TestObj::destruction, 0);
 }
 
-TEST(Comparison, equalityBothEmpty) {
+TEST(Comparison, bothEmpty) {
 	Vector<int> v1, v2;
 	
 	ASSERT_TRUE(v1==v2);
+	ASSERT_FALSE(v1<v2);
+	ASSERT_TRUE(v1<=v2);
+	ASSERT_FALSE(v1>v2);
+	ASSERT_TRUE(v1>=v2);
 }
 
-TEST(Comparison, equalityOneEmpty) {
+TEST(Comparison, oneEmpty) {
 	const size_t CREATE_COUNT = 10;
 	Vector<int> v1;
-	Vector<int> v2(CREATE_COUNT);
+	Vector<int> v2(CREATE_COUNT, 0);
 	
 	ASSERT_FALSE(v1==v2);
+	ASSERT_TRUE(v1<v2);
+	ASSERT_TRUE(v1<=v2);
+	ASSERT_FALSE(v1>v2);
+	ASSERT_FALSE(v1>=v2);
 }
 
-TEST(Comparison, equalityDifferentSizes) {
+TEST(Comparison, differentSizes) {
 	const size_t CREATE_COUNT_1 = 5;
 	const size_t CREATE_COUNT_2 = 10;
-	Vector<int> v1(CREATE_COUNT_1);
-	Vector<int> v2(CREATE_COUNT_2);
+	Vector<int> v1(CREATE_COUNT_1, 0);
+	Vector<int> v2(CREATE_COUNT_2, 0);
 	
 	ASSERT_FALSE(v1==v2);
+	ASSERT_TRUE(v1<v2);
+	ASSERT_TRUE(v1<=v2);
+	ASSERT_FALSE(v1>v2);
+	ASSERT_FALSE(v1>=v2);
 }
 
-TEST(Comparison, equalitySameSizeDifferentCapacity) {
+TEST(Comparison, sameSize) {
+	Vector<int> v1{{1,1,1,1,1}};
+	Vector<int> v2{{1,1,1,1,1}};
+	
+	ASSERT_TRUE(v1==v2);
+	ASSERT_FALSE(v1<v2);
+	ASSERT_TRUE(v1<=v2);
+	ASSERT_FALSE(v1>v2);
+	ASSERT_TRUE(v1>=v2);
+}
+
+TEST(Comparison, sameSizeDifferentElements) {
+	Vector<int> v1{{1,2,3}};
+	Vector<int> v2{{2,2,3}};
+	
+	ASSERT_FALSE(v1==v2);
+	ASSERT_TRUE(v1<v2);
+	ASSERT_TRUE(v1<=v2);
+	ASSERT_FALSE(v1>v2);
+	ASSERT_FALSE(v1>=v2);
+}
+
+TEST(Comparison, sameSizeDifferentCapacity) {
 	const size_t CREATE_COUNT = 10;
 	const size_t RESERVE_COUNT = 100;
-	Vector<int> v1(CREATE_COUNT);
-	Vector<int> v2(CREATE_COUNT);
+	Vector<int> v1(CREATE_COUNT, 0);
+	Vector<int> v2(CREATE_COUNT, 0);
 	v2.reserve(RESERVE_COUNT);
 	
 	ASSERT_TRUE(v1==v2);
+	ASSERT_FALSE(v1<v2);
+	ASSERT_TRUE(v1<=v2);
+	ASSERT_FALSE(v1>v2);
+	ASSERT_TRUE(v1>=v2);
 }

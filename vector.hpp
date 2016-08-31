@@ -680,18 +680,14 @@ namespace sandsnip3r {
 	bool myComparisonWithoutEqual(Iterator1 leftIt, Iterator1 leftEnd, Iterator2 rightIt, Iterator2 rightEnd) {
 		while ((leftIt != leftEnd) && (rightIt != rightEnd)) {
 			if (*leftIt < *rightIt) {
-				//Encountered an element where the comparison is true
 				return true;
 			}
 			if (*rightIt < *leftIt) {
-				//Encountered an element where the reverse comparison is true
 				return false;
 			}
-			//Elements were equal
 			++leftIt;
 			++rightIt;
 		}
-		//One list is a subset of another or both are the same length
 		return (leftIt == leftEnd) && (rightIt != rightEnd);
 	}
 
@@ -699,18 +695,14 @@ namespace sandsnip3r {
 	bool myComparisonWithEqual(Iterator1 leftIt, Iterator1 leftEnd, Iterator2 rightIt, Iterator2 rightEnd) {
 		while ((leftIt != leftEnd) && (rightIt != rightEnd)) {
 			if (*leftIt < *rightIt) {
-				//Encountered an element where the comparison is true
 				return true;
 			}
 			if (*rightIt < *leftIt) {
-				//Encountered an element where the reverse comparison is true
 				return false;
 			}
-			//Elements were equal
 			++leftIt;
 			++rightIt;
 		}
-		//One list is a subset of another or both are the same length
 		return leftIt == leftEnd;
 	}
 	

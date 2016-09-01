@@ -271,7 +271,7 @@ namespace sandsnip3r {
 				//Arguments state the the golden ratio is the most appropriate growth factor
 				const auto GROWTH_FACTOR = 1.618;
 				auto cap = capacity();
-				size_type newCapacity = (cap == 0 ? 1 : std::round(cap * GROWTH_FACTOR));
+				size_type newCapacity = (cap == 0 ? 1 : std::llround(cap * GROWTH_FACTOR));
 				reallocate(newCapacity);
 			}
 		}

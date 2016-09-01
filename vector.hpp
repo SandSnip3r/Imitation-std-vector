@@ -2,6 +2,7 @@
 #define VECTOR_HPP 1
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <iterator>
 #include <memory>
@@ -270,7 +271,7 @@ namespace sandsnip3r {
 				//Arguments state the the golden ratio is the most appropriate growth factor
 				const auto GROWTH_FACTOR = 1.618;
 				auto cap = capacity();
-				size_type newCapacity = (cap == 0 ? 1 : cap * GROWTH_FACTOR);
+				size_type newCapacity = (cap == 0 ? 1 : std::round(cap * GROWTH_FACTOR));
 				reallocate(newCapacity);
 			}
 		}
@@ -317,7 +318,7 @@ namespace sandsnip3r {
 
 		explicit vector(const Allocator& alloc) : vectorAllocator(alloc) {}
 
-		vector(size_type count, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
+		explicit vector(size_type count, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
 			reallocate(count);
 			for (size_type i=0; i<count; ++i) {
 				//Fill with (count) default constructed elements
@@ -335,7 +336,13 @@ namespace sandsnip3r {
 			}
 		}
 
-		/*template<class InputIt>
+		template<class InputIt, typename = std::enable_if_t<
+														std::is_base_of<
+															std::input_iterator_tag,
+															typename std::iterator_traits<InputIt>::iterator_category
+														>::value,
+														InputIt
+													>>
 		vector(InputIt first, InputIt last, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
 			reallocate(last-first);
 			while (first != last) {
@@ -343,7 +350,7 @@ namespace sandsnip3r {
 				emplace_back(*first);
 				++first;
 			}
-		}*/
+		}
 
 		vector(std::initializer_list<Type> ilist, const Allocator &alloc = Allocator()) : vectorAllocator(alloc) {
 			const size_type length = std::distance(ilist.begin(), ilist.end());
@@ -578,9 +585,6 @@ namespace sandsnip3r {
 		const_reverse_iterator crend() const {
 			return const_reverse_iterator(begin());
 		}
-
-		//rbegin, crbegin
-		//rend, crend
 
 		bool empty() const {
 			return begin() == end();

@@ -157,6 +157,42 @@ TEST(Construction, countWithValueConstructionWithCounts) {
 	ASSERT_EQ(TestObj::destruction, CREATE_COUNT);
 }
 
+TEST(Construction, iteratorConstruction) {
+	const size_t CREATE_COUNT = 10;
+	const size_t DEFAULT_VALUE = 987654321;
+
+	std::vector<int> stdVector(CREATE_COUNT, DEFAULT_VALUE);
+
+	Vector<int> v(stdVector.begin(), stdVector.end());
+
+	ASSERT_EQ(v.empty(), false);
+	ASSERT_EQ(v.size(), CREATE_COUNT);
+	ASSERT_GE(v.capacity(), CREATE_COUNT);
+	for (size_t i=0; i<CREATE_COUNT; ++i) {
+		ASSERT_EQ(v.at(i), DEFAULT_VALUE);
+	}
+}
+
+TEST(Construction, iteratorConstructionWithCounts) {
+	const size_t CREATE_COUNT = 10;
+	const auto DEFAULT_VALUE = TestObj();
+
+	std::vector<TestObj> stdVector(CREATE_COUNT, DEFAULT_VALUE);
+
+	TestObj::resetCounts();
+	{
+		Vector<TestObj> v(stdVector.begin(), stdVector.end());
+	}
+	ASSERT_EQ(TestObj::defaultConstruction, 0);
+	ASSERT_EQ(TestObj::valueConstruction, 0);
+	//Copy constructs elements in place copying constructing using the elements in the given range
+	ASSERT_EQ(TestObj::copyConstruction, CREATE_COUNT);
+	ASSERT_EQ(TestObj::moveConstruction, 0);
+	ASSERT_EQ(TestObj::copyAssignment, 0);
+	ASSERT_EQ(TestObj::moveAssignment, 0);
+	ASSERT_EQ(TestObj::destruction, CREATE_COUNT);
+}
+
 TEST(Construction, initializerListConstruction) {
 	Vector<int> v{0, 1, 2, 3, 4};
 
@@ -432,6 +468,17 @@ TEST(Capacity, reserveDownWithCount) {
 	ASSERT_EQ(TestObj::destruction, 0);
 }
 
+TEST(Capacity, resizeUpByAdding) {
+	const int CREATE_COUNT = 10000;
+
+	Vector<int> v;
+	for (int i=1; i<=CREATE_COUNT; ++i) {
+		v.emplace_back(i);
+		ASSERT_EQ(v.size(), i);
+		ASSERT_GE(v.capacity(), i);
+	}
+}
+
 TEST(Capacity, shrinkToFit) {
 	const size_t CREATE_COUNT = 10;
 	const int RESERVE_AMOUNT = 100;
@@ -664,8 +711,8 @@ TEST(Comparison, differentSizes) {
 }
 
 TEST(Comparison, sameSize) {
-	Vector<int> v1{{1,1,1,1,1}};
-	Vector<int> v2{{1,1,1,1,1}};
+	Vector<int> v1{1,1,1,1,1};
+	Vector<int> v2{1,1,1,1,1};
 	
 	ASSERT_TRUE(v1==v2);
 	ASSERT_FALSE(v1<v2);
@@ -675,8 +722,19 @@ TEST(Comparison, sameSize) {
 }
 
 TEST(Comparison, sameSizeDifferentElements) {
-	Vector<int> v1{{1,2,3}};
-	Vector<int> v2{{2,2,3}};
+	Vector<int> v1{1,2,3};
+	Vector<int> v2{2,2,3};
+	
+	ASSERT_FALSE(v1==v2);
+	ASSERT_TRUE(v1<v2);
+	ASSERT_TRUE(v1<=v2);
+	ASSERT_FALSE(v1>v2);
+	ASSERT_FALSE(v1>=v2);
+}
+
+TEST(Comparison, sameSizeReversed) {
+	Vector<int> v1{1,2,3,4,5,6};
+	Vector<int> v2(v1.rbegin(), v1.rend());
 	
 	ASSERT_FALSE(v1==v2);
 	ASSERT_TRUE(v1<v2);

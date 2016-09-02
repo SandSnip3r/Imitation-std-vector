@@ -617,9 +617,18 @@ namespace sandsnip3r {
 			resizeDown(0);
 		}
 
-		//insert
-		//emplace
-		//erase
+		// iterator insert(const_iterator pos, const value_type& value)
+		// iterator insert(const_iterator pos, T&& value)
+		// iterator insert(const_iterator pos, size_type count, const T& value)
+		// template< class InputIt >
+		// iterator insert(const_iterator pos, InputIt first, InputIt last)
+		// iterator insert(const_iterator pos, std::initializer_list<T> ilist)
+
+		// template< class... Args > 
+		// iterator emplace(const_iterator pos, Args&&... args)
+
+		// iterator erase(const_iterator pos);
+		// iterator erase(const_iterator first, const_iterator last);
 
 		void push_back(const value_type &obj) {
 			reallocateIfNecessary();

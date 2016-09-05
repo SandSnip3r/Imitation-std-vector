@@ -289,22 +289,23 @@ namespace sandsnip3r {
 			if (newCapacity > max_size()) {
 				throw std::length_error("vector::reallocate() newCapacity (which is "+std::to_string(newCapacity)+") > max_size (which is "+std::to_string(max_size())+")");
 			}
-			pointer newData = allocate(newCapacity);
-			auto dataSize = dataEnd-dataBegin;
-			//Move the old data into our new storage chunk
-			std::move(dataBegin, std::next(dataBegin, dataSize), newData);
-			//Assign the new data to be the current
-			dataBegin = std::move(newData);
-			//Update the end-of-data pointer
-			dataEnd = dataBegin + dataSize;
-			//Update the end-of-container pointer
-			containerEnd = dataBegin + newCapacity;
-		}
-
-		void throwIfOutOfBounds(size_type pos, const std::string &methodName) const {
-			if (!(pos < size())) {
-				throw std::out_of_range("vector::"+methodName+"() pos (which is "+std::to_string(pos)+") >= size (which is "+std::to_string(size())+")");
+			pointer newDataBegin = allocate(newCapacity);
+			pointer newDataEnd = newDataBegin;
+			auto it = dataBegin;
+			//Move construct new elements into place
+			//	also destroy previous
+			while (it != dataEnd) {
+				allocatorTraits::construct(vectorAllocator, newDataEnd, std::move(*it));
+				allocatorTraits::destroy(vectorAllocator, it);
+				++it;
+				++newDataEnd;
 			}
+			//Deallocate previous memory
+			deallocate(dataBegin, containerEnd - dataBegin);
+			//Update data pointers
+			dataBegin = newDataBegin;
+			dataEnd = newDataEnd;
+			containerEnd = dataBegin + newCapacity;
 		}
 
 		void resizeDown(size_type count) {
@@ -660,7 +661,7 @@ namespace sandsnip3r {
 			auto dataSize = size();
 			if (dataSize < count) {
 				reallocateToNewSizeIfNecessary(count);
-				for (auto i=dataSize; i<=count; ++i) {
+				for (auto i=dataSize; i<count; ++i) {
 					//Fill with default constructed elements
 					allocatorTraits::construct(vectorAllocator, dataEnd);
 					++dataEnd;
@@ -675,7 +676,7 @@ namespace sandsnip3r {
 			auto dataSize = size();
 			if (dataSize < count) {
 				reallocateToNewSizeIfNecessary(count);
-				for (auto i=dataSize; i<=count; ++i) {
+				for (auto i=dataSize; i<count; ++i) {
 					//Fill with default constructed elements
 					allocatorTraits::construct(vectorAllocator, dataEnd, value);
 					++dataEnd;

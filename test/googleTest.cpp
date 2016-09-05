@@ -17,25 +17,25 @@ public:
 	~TestObj();
 	TestObj& operator=(const TestObj &other) noexcept;
 	TestObj& operator=(TestObj &&other) noexcept;
-	static int defaultConstruction;
-	static int valueConstruction;
-	static int copyConstruction;
-	static int moveConstruction;
-	static int copyAssignment;
-	static int moveAssignment;
-	static int destruction;
+	static uint64_t defaultConstruction;
+	static uint64_t valueConstruction;
+	static uint64_t copyConstruction;
+	static uint64_t moveConstruction;
+	static uint64_t copyAssignment;
+	static uint64_t moveAssignment;
+	static uint64_t destruction;
 	static void resetCounts();
 };
 
 //Declare TestObj's static members
 //	these are used for counting constructions and destructions
-int TestObj::defaultConstruction;
-int TestObj::valueConstruction;
-int TestObj::copyConstruction;
-int TestObj::moveConstruction;
-int TestObj::copyAssignment;
-int TestObj::moveAssignment;
-int TestObj::destruction;
+uint64_t TestObj::defaultConstruction;
+uint64_t TestObj::valueConstruction;
+uint64_t TestObj::copyConstruction;
+uint64_t TestObj::moveConstruction;
+uint64_t TestObj::copyAssignment;
+uint64_t TestObj::moveAssignment;
+uint64_t TestObj::destruction;
 
 TestObj::TestObj() {
 	++defaultConstruction;
@@ -512,6 +512,62 @@ TEST(Capacity, DISABLED_shrinkToFitWithCount) {
 	ASSERT_EQ(TestObj::destruction, CREATE_COUNT);
 }
 
+TEST(Resize, resizeUpDefaultConstruct) {
+	const size_t CREATE_COUNT_1 = 10;
+	const size_t CREATE_COUNT_2 = 20;
+
+	//Second size must be larger
+	ASSERT_GT(CREATE_COUNT_2, CREATE_COUNT_1);
+
+	Vector<int> v1(CREATE_COUNT_1);
+	v1.resize(CREATE_COUNT_2);
+
+	ASSERT_EQ(v1.size(), CREATE_COUNT_2);
+	ASSERT_EQ(v1.capacity(), CREATE_COUNT_2);
+}
+
+TEST(Resize, resizeUpDefaultConstructWithCounts) {
+	const size_t CREATE_COUNT_1 = 10;
+	const size_t CREATE_COUNT_2 = 35;
+
+	//Second size must be larger
+	ASSERT_GT(CREATE_COUNT_2, CREATE_COUNT_1);
+
+	Vector<TestObj> v1(CREATE_COUNT_1);
+	
+	TestObj::resetCounts();
+	v1.resize(CREATE_COUNT_2);
+
+	//New elements are default-constructed
+	ASSERT_EQ(TestObj::defaultConstruction, CREATE_COUNT_2 - CREATE_COUNT_1);
+	ASSERT_EQ(TestObj::valueConstruction, 0);
+	ASSERT_EQ(TestObj::copyConstruction, 0);
+	//Old elements are move-constructed
+	ASSERT_EQ(TestObj::moveConstruction, CREATE_COUNT_1);
+	ASSERT_EQ(TestObj::copyAssignment, 0);
+	ASSERT_EQ(TestObj::moveAssignment, 0);
+	//Old elements are destroyed
+	ASSERT_EQ(TestObj::destruction, CREATE_COUNT_1);
+}
+
+TEST(Resize, resizeUpCopyConstruct) {
+	const size_t CREATE_COUNT_1 = 10;
+	const size_t CREATE_COUNT_2 = 20;
+	const int DEFAULT_VALUE = 987654321;
+
+	//Second size must be larger
+	ASSERT_GT(CREATE_COUNT_2, CREATE_COUNT_1);
+
+	Vector<int> v1(CREATE_COUNT_1);
+	v1.resize(CREATE_COUNT_2, DEFAULT_VALUE);
+
+	ASSERT_EQ(v1.size(), CREATE_COUNT_2);
+	ASSERT_EQ(v1.capacity(), CREATE_COUNT_2);
+	for (size_t i=CREATE_COUNT_1; i<CREATE_COUNT_2; ++i) {
+		ASSERT_EQ(v1[i], DEFAULT_VALUE);
+	}
+}
+
 TEST(Swap, memberSwapBothNonEmpty) {
 	const size_t CREATE_COUNT_1 = 10;
 	const size_t CREATE_COUNT_2 = 500;
@@ -535,8 +591,8 @@ TEST(Swap, memberSwapBothNonEmptyWithCount) {
 
 	ASSERT_NE(CREATE_COUNT_1, CREATE_COUNT_2);
 
-	Vector<int> v1(CREATE_COUNT_1);
-	Vector<int> v2(CREATE_COUNT_2);
+	Vector<TestObj> v1(CREATE_COUNT_1);
+	Vector<TestObj> v2(CREATE_COUNT_2);
 	
 	TestObj::resetCounts();
 	v1.swap(v2);
@@ -569,8 +625,8 @@ TEST(Swap, memberSwapOneEmpty) {
 TEST(Swap, memberSwapOneEmptyWithCount) {
 	const size_t CREATE_COUNT = 10;
 
-	Vector<int> v1(CREATE_COUNT);
-	Vector<int> v2;
+	Vector<TestObj> v1(CREATE_COUNT);
+	Vector<TestObj> v2;
 	
 	TestObj::resetCounts();
 	v1.swap(v2);
@@ -599,7 +655,7 @@ TEST(Swap, memberSwapBothEmpty) {
 }
 
 TEST(Swap, memberSwapBothEmptyWithCount) {
-	Vector<int> v1, v2;
+	Vector<TestObj> v1, v2;
 	
 	TestObj::resetCounts();
 	v1.swap(v2);

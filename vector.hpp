@@ -36,9 +36,8 @@ namespace sandsnip3r {
 			pointer iteratorPointer{nullptr};
 			iterator(pointer ptr) : iteratorPointer(ptr) {} 
 		public:
-			iterator() {}
+			iterator() = default;
 			iterator(const iterator &it) : iteratorPointer(it.iteratorPointer) {}
-			// ~iterator();
 			iterator& operator=(const iterator &it) {
 				if (this != &it) {
 					this->iteratorPointer = it.iteratorPointer;
@@ -128,7 +127,9 @@ namespace sandsnip3r {
 				return (left.iteratorPointer-right.iteratorPointer);
 			}
 
-			// reference operator[](size_type) const;
+			reference operator[](size_type n) const {
+				return iteratorPointer[n];
+			}
 		};
 
 		class const_iterator {
@@ -146,9 +147,8 @@ namespace sandsnip3r {
 			pointer iteratorPointer{nullptr};
 			const_iterator(pointer ptr) : iteratorPointer(ptr) {} 
 		public:
-			const_iterator() {}
+			const_iterator() = default;
 			const_iterator(const const_iterator &it) : iteratorPointer(it.iteratorPointer) {}
-			// ~const_iterator();
 			const_iterator& operator=(const const_iterator &it) {
 				if (this != &it) {
 					this->iteratorPointer = it.iteratorPointer;
@@ -245,7 +245,9 @@ namespace sandsnip3r {
 				return (left.iteratorPointer-right.iteratorPointer);
 			}
 
-			// reference operator[](size_type) const;
+			reference operator[](size_type n) const {
+				return iteratorPointer[n];
+			}
 		};
 		using reverse_iterator 				= std::reverse_iterator<iterator>;
 		using const_reverse_iterator 	= std::reverse_iterator<const_iterator>;
@@ -646,8 +648,7 @@ namespace sandsnip3r {
 		reference emplace_back(Args&&... args) {
 			reallocateIfNecessary();
 			allocatorTraits::construct(vectorAllocator, dataEnd, std::forward<Args>(args)...);
-			++dataEnd;
-			return *(end()-1);
+			return *(dataEnd++);
 		}
 		
 		void pop_back() {
